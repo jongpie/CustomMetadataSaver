@@ -1,0 +1,15 @@
+# Folders to exclude
+.localdevserver/
+.settings/
+.sfdx/
+.vscode/
+
+# NPM
+node_modules/
+package-lock.json
+yarn.lock
+
+# Files to exclude
+*.log
+
+node_modules
