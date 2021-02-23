@@ -23,6 +23,7 @@ public inherited sharing class CustomMetadataSaver {
                     continue;
                 }
 
+                // TODO might need to skip additional fields
                 // if(customMetadataRecord.getSObjectType().getDescribe().fields.getMap().get(fieldName).getDescribe().isUpdateable() == false) {
                 //     continue;
                 // }

@@ -28,6 +28,27 @@ public inherited sharing class CustomMetadataEditor {
             when BOOLEAN {
                 return Boolean.valueOf(fieldValue);
             }
+            when DATE {
+                return Date.valueOf(fieldValue);
+            }
+            when DATETIME {
+                return DateTime.valueOf(fieldValue);
+            }
+            when DOUBLE {
+                return Double.valueOf(fieldValue);
+            }
+            when ID {
+                return Id.valueOf(fieldValue);
+            }
+            when INTEGER {
+                return Integer.valueOf(fieldValue);
+            }
+            // when STRING {
+            //     return String.valueOf(fieldValue);
+            // }
+            // when TIME {
+            //     return Time.valueOf(fieldValue);
+            // }
             when else {
                 return fieldValue;
             }
