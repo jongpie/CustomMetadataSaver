@@ -15,24 +15,26 @@ public inherited sharing class FlowCustomMetadataEditor {
         public String fieldValue;
     }
 
-    @InvocableMethod(category='Custom Metadata' label='Edit Custom Metadata Record' description='Provides the ability to update a field on a custom metadata record')
+    @InvocableMethod(
+        category='Custom Metadata'
+        label='Update Field on a Custom Metadata Record'
+        description='Provides the ability to update a field on a custom metadata record'
+    )
     public static void editCustomMetadata(List<FlowInput> inputs) {
         System.debug('FlowCustomMetadataEditor inputs==' + inputs);
 
-        for(FlowInput input : inputs) {
+        for (FlowInput input : inputs) {
             Schema.SObjectType sobjectType = input.customMetadataRecord.getSObjectType();
+            // TODO add proper handling/error throwing for invalid field names
             Schema.SObjectField field = sobjectType.getDescribe().fields.getMap().get(input.fieldName);
             Object value = getValue(sobjectType, field, input.fieldValue);
 
-            //input.customMetadataRecord.put(input.fieldName, value);
 
             CustomMetadataSaver.updateInstance(input.customMetadataRecord, field, value);
         }
     }
 
     private static Object getValue(Schema.SObjectType sobjectType, Schema.SObjectField field, String fieldValue) {
-        //Schema.SObjectField field = sobjectType.getDescribe().fields.getMap().get(fieldName);
-
         switch on field.getDescribe().getSoapType() {
             when BOOLEAN {
                 return Boolean.valueOf(fieldValue);
@@ -52,6 +54,8 @@ public inherited sharing class FlowCustomMetadataEditor {
             when INTEGER {
                 return Integer.valueOf(fieldValue);
             }
+            // FIXME Time.class does not have a `parse(String)` or `valueOf(String)` methods
+            //       Look for options to implement
             // when TIME {
             //     return Time.valueOf(fieldValue);
             // }

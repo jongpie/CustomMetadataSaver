@@ -15,7 +15,11 @@ public inherited sharing class FlowCustomMetadataCreator  {
         public String developerName;
     }
 
-    @InvocableMethod(category='Custom Metadata' label='Create New Custom Metadata Record' description='Provides the ability to update a field on a custom metadata record')
+    @InvocableMethod(
+        category='Custom Metadata'
+        label='Initalize a New Custom Metadata Record'
+        description='Provides the ability to create a new custom metadata record'
+    )
     public static List<SObject> initalizeCustomMetadata(List<FlowInput> inputs) {
         System.debug('FlowCustomMetadataCreator inputs==' + inputs);
 
@@ -29,7 +33,7 @@ public inherited sharing class FlowCustomMetadataCreator  {
             newCustomMetadataRecord.put('MasterLabel', input.masterLabel);
             newCustomMetadataRecord.put('DeveloperName', input.developerName);
 
-            String fullName = CustomMetadataSaver.getFullName(newCustomMetadataRecord);
+            String fullName = getFullName(newCustomMetadataRecord);
             customMetadataRecordNames.add(fullName);
 
             CustomMetadataSaver.addInstance(newCustomMetadataRecord);
@@ -37,5 +41,10 @@ public inherited sharing class FlowCustomMetadataCreator  {
         }
 
         return customMetadataRecords;
+    }
+
+    private static String getFullName(SObject customMetadataRecord) {
+        String customMetadataTypePrefix = customMetadataRecord.getSObjectType().getDescribe().getName().replace('__mdt', '');
+        return customMetadataTypePrefix + '.' + customMetadataRecord.get('DeveloperName');
     }
 }
