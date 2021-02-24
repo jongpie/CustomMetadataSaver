@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>test</label>
+    <protected>false</protected>
+    <values>
+        <field>ExampleCheckboxField__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>ExampleDateField__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>ExampleDatetimeField__c</field>
+        <value xsi:type="xsd:dateTime">2021-02-24T08:18:00.000Z</value>
+    </values>
+    <values>
+        <field>ExampleEmailField__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>ExampleNumberField__c</field>
+        <value xsi:type="xsd:double">69.4201</value>
+    </values>
+    <values>
+        <field>ExamplePercentField__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>ExamplePhoneField__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>ExamplePicklistField__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>ExampleTextAreaField__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>ExampleTextAreaLongField__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>ExampleTextField__c</field>
+        <value xsi:type="xsd:string">hello, it&apos;s flow, ya know</value>
+    </values>
+    <values>
+        <field>ExampleURLField__c</field>
+        <value xsi:nil="true"/>
+    </values>
+</CustomMetadata>
