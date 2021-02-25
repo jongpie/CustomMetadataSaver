@@ -11,7 +11,7 @@ public inherited sharing class FlowCustomMetadataCreator  {
         @InvocableVariable(required=true label='The label of the new custom metadata record')
         public String masterLabel;
 
-        @InvocableVariable(required=true label='The unique API name of the new custom metadata record')
+        @InvocableVariable(required=true label='The API name of the new custom metadata record')
         public String developerName;
     }
 

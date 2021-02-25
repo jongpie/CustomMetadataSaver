@@ -17,7 +17,7 @@ public inherited sharing class CustomMetadataSaver {
         return CUSTOM_METADATAR_RECORDS_BY_NAME;
     }
 
-    public static void addAllInstances(List<SObject> customMetadataRecords) {
+    public static void addAll(List<SObject> customMetadataRecords) {
         for (SObject customMetadataRecord : customMetadataRecords) {
             addInstance(customMetadataRecord);
         }
@@ -47,25 +47,24 @@ public inherited sharing class CustomMetadataSaver {
         description='Deploys changes to any custom metadata records that have been added via addCustomMetadata()'
     )
     public static void deploy() {
+        // TODO maybe add an internal instance of Metadata.DeployCallback to use as a default callback
         deploy(null);
     }
 
-    public static Id deploy(Metadata.DeployCallback callback) {
+    public static void deploy(Metadata.DeployCallback callback) {
         Metadata.DeployContainer deployment = new Metadata.DeployContainer();
 
         for (SObject customMetadataRecord : CUSTOM_METADATAR_RECORDS_BY_NAME.values()) {
             Metadata.CustomMetadata customMetadata = createDeployableCustomMetadata(customMetadataRecord);
             deployment.addMetadata(customMetadata);
         }
-        // TODO maybe add an instance of Metadata.DeployCallback to use as a callback - for now, it's a parameter
+
         Id jobId = Metadata.Operations.enqueueDeployment(deployment, callback);
         DEPLOYMENT_JOB_IDS.add(jobId);
         System.debug(LoggingLevel.INFO, 'Deployment Job ID: ' + jobId);
 
         // Clear out the cached CMDT records after they've been saved
         CUSTOM_METADATAR_RECORDS_BY_NAME.clear();
-
-        return jobId;
     }
 
     public static List<Id> getDeploymentJobIds() {
