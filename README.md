@@ -8,33 +8,32 @@
 This is a small library that can be used in Salesforce to update & deploy changes to custom metadata types (CMDT) from Apex and Flow.
 
 ## Flow
-Deploying CMDT changes from Flow consists of 3 actions
- * **Initalize a New Custom Metadata Record** (`CustomMetadataEditor.initalizeCustomMetadata(List<FlowInput> inputs)`) - this action creates a new in-memory instance of the specified CMDT object. is used to update a field on the custom metadata record. This is needed because Salesforce ignores any field changes on CMDT made in Flow. Each input has 3 attributes, and the `SObject` instance of the new CMDT record is returned.
-    * `String customMetadataTypeName` - The API name of the CMDT object
-    * `String masterLabel` - The value to use as the new CMDT record's label
-    * `String developerName` - The value to use as the new CMDT record's unique name
 
+Deploying CMDT changes from Flow consists of 2 actions
 
-![Flow: Initialize New CMDT Record](./content/flow-init-new-cmdt-record.png)
+-   **Create a New Custom Metadata Record** (`FlowCustomMetadataCreator.newInstance(List<FlowInput> inputs)`) - this action creates a new in-memory instance of the specified CMDT object. This is needed because Salesforce does not allow you to create a new CMDT record directly in Flow. Each input has 3 attributes, and the `SObject` instance of the new CMDT record is returned.
+    -   `String customMetadataTypeName` - The API name of the CMDT object
+    -   `String masterLabel` - The value to use as the new CMDT record's label
+    -   `String developerName` - The value to use as the new CMDT record's unique name
 
- * `CustomMetadataEditor.editCustomMetadata(List<FlowInput> flowInputs)` - this is used to update a field on the custom metadata record. If you need to set multiple fields on a CMDT record, you will have to call this action multiple times (once per field update). Each input has 3 attributes:
-    * `SObject customMetadataRecord` - The CMDT record to update
-    * `String fieldName` - The API name of the field to update
-    * `String fieldValue` - The new value to use for the field
+![Flow: Create New CMDT Record](./content/flow-create-new-cmdt-record.png)
 
-![Flow: Set CMDT Fields](./content/flow-set-cmdt-fields.png)
+-   **Update your CMDT records using Flow** - Once you have either created a new CMDT record, or queried for existing CMDT records, you can use standard Flow assignments & loops to make changes to the CMDT records.
 
- * `CustomMetadataSaver.deployCustomMetadata()` - this action will asynchronously deploy any pending changes made to CMDT records
+![Flow: Update CMDT Record Field](./content/flow-get-cmdt-and-update.png)
+
+-   **Deploy Changes to Custom Metadata Records** (`CustomMetadataSaver.deploy(List<SObject> cmdtRecords)` - this action will asynchronously deploy any pending changes made to CMDT records. Simply pass in your collection of new and/or updated CMDT records, and the Apex action will deploy the changes.
+    -   `List<SObject> cmdtRecords` - The collection of custom metadata records to deploy
 
 ![Flow: Deploy CMDT Records](./content/flow-deploy-cmdt-records.png)
 
 ## Apex
-Since Apex can already update custom metadata records (it just can't save the changes using DML statements), it's a little easier to deploy the changes from Apex.
- * First, update your CMDT record's field values
- * Next, call the method `CustomMetadataSaver.addInstance(SObject customMetadataRecord)` (single record) or `CustomMetadataSaver.addAll(List<SObject> customMetadataRecords)` (list of records).
-   * These methods register & track the custom metadata record provided - this enables the system to manage multiple updates made to the same CMDT record (e.g., you make changes to the same CMDT record via Flow and Apex).
-   * You can call these methods multiple times if you are updating multiple CMDT records.
- * Finally, when you have finished making changes to the CMDT records, call `CustomMetadataSaver.deploy()` to start the async deployment. Any pending CMDT changes will be deployed in a single deployment.
+
+Since Apex can already update custom metadata records (it just can't save the changes using DML statements), it's fairly straightforward process to deploy the changes from Apex.
+
+-   First, create or query for the CMDT records you want to update
+-   Next, set any desired fields on your CMDT records
+-   Finally, call the method `CustomMetadataSaver.deploy(List<SObject> cmdtRecords)` to deploy your records
 
 ```java
     // Create new CMDT record (or you can query existing records)
@@ -43,14 +42,11 @@ Since Apex can already update custom metadata records (it just can't save the ch
     myExampleCMDT.DeveloperName = 'My_CMDT_Record';
     myExampleCMDT.ExampleTextField__c = 'Some value';
 
-    // Add the new CMDT record to CustomMetadataSaver
-    CustomMetadataSaver.addInstance(myExampleCMDT);
-
-    // If you want, you can still make additional changes after adding it to CustomMetadataSaver
-    myExampleCMDT.ExampleDateField__c = System.today();
+    // Add the new CMDT record to a list
+    List<CustomMetadataDeployTest__mdt> records = new List<CustomMetadataDeployTest__mdt>{myExampleCMDT};
 
     // Finally, deploy your changes
-    CustomMetadataSaver.deploy();
+    CustomMetadataSaver.deploy(records);
 
     // Bonus, get the deployment job IDs if you want to monitor them
     List<Id> deploymentJobIds = CustomMetadataSaver.getDeploymentJobIds();

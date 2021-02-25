@@ -4,80 +4,54 @@
 //----------------------------------------------------------------------------------------------------//
 
 public inherited sharing class CustomMetadataSaver {
-    private static final Map<String, SObject> CUSTOM_METADATAR_RECORDS_BY_NAME = new Map<String, SObject>();
     private static final Set<String> IGNORED_FIELD_NAMES = getIgnoredFieldNames();
-    private static final List<Id> DEPLOYMENT_JOB_IDS = new List<Id>();
+    private static final List<String> DEPLOYMENT_JOB_IDS = new List<String>();
 
-    public static SObject getInstance(SObject customMetadataRecord) {
-        String fullName = getFullName(customMetadataRecord);
-        return CUSTOM_METADATAR_RECORDS_BY_NAME.get(fullName);
-    }
-
-    public static Map<String, SObject> getAll() {
-        return CUSTOM_METADATAR_RECORDS_BY_NAME;
-    }
-
-    public static void addAll(List<SObject> customMetadataRecords) {
-        for (SObject customMetadataRecord : customMetadataRecords) {
-            addInstance(customMetadataRecord);
-        }
-    }
-
-    public static void addInstance(SObject customMetadataRecord) {
-        String fullName = getFullName(customMetadataRecord);
-
-        customMetadataRecord = customMetadataRecord.clone();
-        CUSTOM_METADATAR_RECORDS_BY_NAME.put(fullName, customMetadataRecord);
-    }
-
-    public static void updateInstance(SObject customMetadataRecord, SObjectField field, Object value) {
-        String fullName = getFullName(customMetadataRecord);
-
-        if (CUSTOM_METADATAR_RECORDS_BY_NAME.containsKey(fullName) == false) {
-            addInstance(customMetadataRecord);
-        }
-
-        customMetadataRecord = getInstance(customMetadataRecord);
-        customMetadataRecord.put(field, value);
+    private CustomMetadataSaver() {
+        //static only
     }
 
     @InvocableMethod(
         category='Custom Metadata'
         label='Deploy Changes to Custom Metadata Records'
-        description='Deploys changes to any custom metadata records that have been added via addCustomMetadata()'
+        description='Deploys changes to the list of custom metadata records'
     )
-    public static void deploy() {
-        // TODO maybe add an internal instance of Metadata.DeployCallback to use as a default callback
-        deploy(null);
+    public static void deploy(List<List<SObject>> customMetadataRecordsLists) {
+        System.debug('customMetadataRecordsLists==' + customMetadataRecordsLists);
+
+        List<SObject> consolidatedList = new List<SObject>();
+        for (List<SObject> customMetadataRecordsList : customMetadataRecordsLists) {
+            consolidatedList.addAll(customMetadataRecordsList);
+        }
+
+        System.debug('consolidatedList==' + consolidatedList);
+
+        deploy(consolidatedList, null);
     }
 
-    public static void deploy(Metadata.DeployCallback callback) {
+    public static void deploy(List<SObject> customMetadataRecords) {
+        deploy(customMetadataRecords, null);
+    }
+
+    public static void deploy(List<SObject> customMetadataRecords, Metadata.DeployCallback callback) {
         Metadata.DeployContainer deployment = new Metadata.DeployContainer();
 
-        for (SObject customMetadataRecord : CUSTOM_METADATAR_RECORDS_BY_NAME.values()) {
+        for (SObject customMetadataRecord : customMetadataRecords) {
             Metadata.CustomMetadata customMetadata = createDeployableCustomMetadata(customMetadataRecord);
             deployment.addMetadata(customMetadata);
         }
 
-        Id jobId = Test.isRunningTest() ? null : Metadata.Operations.enqueueDeployment(deployment, callback);
+        String jobId = Test.isRunningTest() ? 'Fake Job ID' : Metadata.Operations.enqueueDeployment(deployment, callback);
         DEPLOYMENT_JOB_IDS.add(jobId);
         System.debug(LoggingLevel.INFO, 'Deployment Job ID: ' + jobId);
-
-        // Clear out the cached CMDT records after they've been saved
-        CUSTOM_METADATAR_RECORDS_BY_NAME.clear();
     }
 
-    public static List<Id> getDeploymentJobIds() {
+    public static List<String> getDeploymentJobIds() {
         return DEPLOYMENT_JOB_IDS;
     }
 
     private static Set<String> getIgnoredFieldNames() {
         return new Set<String>{ 'DeveloperName', 'Id', 'Label', 'Language', 'MasterLabel', 'NamespacePrefix', 'QualifiedApiName' };
-    }
-
-    private static String getFullName(SObject customMetadataRecord) {
-        String customMetadataTypePrefix = customMetadataRecord.getSObjectType().getDescribe().getName().replace('__mdt', '');
-        return customMetadataTypePrefix + '.' + customMetadataRecord.get('DeveloperName');
     }
 
     private static Metadata.CustomMetadata createDeployableCustomMetadata(SObject customMetadataRecord) {
