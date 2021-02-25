@@ -10,7 +10,7 @@ This is a small library that can be used in Salesforce to update & deploy change
 ## Flow
 Deploying CMDT changes from Flow consists of 3 actions
  * **Initalize a New Custom Metadata Record** (`CustomMetadataEditor.initalizeCustomMetadata(List<FlowInput> inputs)`) - this action creates a new in-memory instance of the specified CMDT object. is used to update a field on the custom metadata record. This is needed because Salesforce ignores any field changes on CMDT made in Flow. Each input has 3 attributes, and the `SObject` instance of the new CMDT record is returned.
-    * `String customMetadataTypeName` = The API name of the CMDT object
+    * `String customMetadataTypeName` - The API name of the CMDT object
     * `String masterLabel` - The value to use as the new CMDT record's label
     * `String developerName` - The value to use as the new CMDT record's unique name
 
@@ -53,5 +53,5 @@ Since Apex can already update custom metadata records (it just can't save the ch
     CustomMetadataSaver.deploy();
 
     // Bonus, get the deployment job IDs if you want to monitor them
-	List<Id> deploymentJobIds = CustomMetadataSaver.getDeploymentJobIds();
+    List<Id> deploymentJobIds = CustomMetadataSaver.getDeploymentJobIds();
 ```
