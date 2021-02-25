@@ -3,6 +3,7 @@
 .settings/
 .sfdx/
 .vscode/
+**/main/default/
 
 # NPM
 node_modules/
