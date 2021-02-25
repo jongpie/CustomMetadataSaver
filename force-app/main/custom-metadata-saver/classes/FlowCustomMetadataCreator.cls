@@ -3,7 +3,7 @@
 // See LICENSE file or go to https://github.com/jongpie/CustomMetadataSaver for full license details. //
 //----------------------------------------------------------------------------------------------------//
 
-public inherited sharing class FlowCustomMetadataCreator  {
+public inherited sharing class FlowCustomMetadataCreator {
     public class FlowInput {
         @InvocableVariable(required=true label='The API name of the custom metadata type')
         public String customMetadataTypeName;
@@ -15,18 +15,22 @@ public inherited sharing class FlowCustomMetadataCreator  {
         public String developerName;
     }
 
+    private FlowCustomMetadataCreator() {
+        // Static only
+    }
+
     @InvocableMethod(
         category='Custom Metadata'
-        label='Initalize a New Custom Metadata Record'
+        label='Creates a New Instance of a Custom Metadata Record'
         description='Provides the ability to create a new custom metadata record'
     )
-    public static List<SObject> initalizeCustomMetadata(List<FlowInput> inputs) {
+    public static List<SObject> newInstance(List<FlowInput> inputs) {
         System.debug('FlowCustomMetadataCreator inputs==' + inputs);
 
         List<String> customMetadataRecordNames = new List<String>();
         List<SObject> customMetadataRecords = new List<SObject>();
 
-        for(FlowInput input : inputs) {
+        for (FlowInput input : inputs) {
             SObjectType sobjectType = Schema.getGlobalDescribe().get(input.customMetadataTypeName);
             SObject newCustomMetadataRecord = sobjectType.newSObject();
 
@@ -36,7 +40,7 @@ public inherited sharing class FlowCustomMetadataCreator  {
             String fullName = getFullName(newCustomMetadataRecord);
             customMetadataRecordNames.add(fullName);
 
-            CustomMetadataSaver.addInstance(newCustomMetadataRecord);
+            //CustomMetadataSaver.addInstance(newCustomMetadataRecord);
             customMetadataRecords.add(newCustomMetadataRecord);
         }
 
