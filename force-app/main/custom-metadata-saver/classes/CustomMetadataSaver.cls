@@ -59,7 +59,7 @@ public inherited sharing class CustomMetadataSaver {
             deployment.addMetadata(customMetadata);
         }
 
-        Id jobId = Metadata.Operations.enqueueDeployment(deployment, callback);
+        Id jobId = Test.isRunningTest() ? null : Metadata.Operations.enqueueDeployment(deployment, callback);
         DEPLOYMENT_JOB_IDS.add(jobId);
         System.debug(LoggingLevel.INFO, 'Deployment Job ID: ' + jobId);
 
