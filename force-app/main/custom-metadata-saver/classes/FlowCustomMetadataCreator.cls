@@ -40,7 +40,6 @@ public inherited sharing class FlowCustomMetadataCreator {
             String fullName = getFullName(newCustomMetadataRecord);
             customMetadataRecordNames.add(fullName);
 
-            //CustomMetadataSaver.addInstance(newCustomMetadataRecord);
             customMetadataRecords.add(newCustomMetadataRecord);
         }
 
