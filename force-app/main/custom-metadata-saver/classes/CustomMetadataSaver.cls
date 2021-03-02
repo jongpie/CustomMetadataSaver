@@ -66,9 +66,19 @@ public inherited sharing class CustomMetadataSaver {
                 continue;
             }
 
+            Schema.SObjectField field = customMetadataRecord.getSObjectType().getDescribe().fields.getMap().get(fieldName);
+
+            Object value;
+            // Picklist values have to be cast to strings (even though they already look like strings)
+            if (field.getDescribe().getType() == Schema.DisplayType.PICKLIST) {
+                value = String.valueOf(customMetadataRecord.get(field));
+            } else {
+                value = customMetadataRecord.getPopulatedFieldsAsMap().get(fieldName);
+            }
+
             Metadata.CustomMetadataValue customField = new Metadata.CustomMetadataValue();
             customField.field = fieldName;
-            customField.value = customMetadataRecord.getPopulatedFieldsAsMap().get(fieldName);
+            customField.value = value;
             System.debug(LoggingLevel.INFO, 'customField==' + customField);
 
             customMetadata.values.add(customField);
