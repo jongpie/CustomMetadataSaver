@@ -7,10 +7,14 @@
 private class CustomMetadataSaver_Tests {
     @isTest
     static void it_should_deploy_cmdt_record() {
-        CustomMetadataDeployTest__mdt cmdtRecord = getNewRecord();
-        cmdtRecord.ExampleCheckboxField__c = true;
-        cmdtRecord.ExampleDateField__c = System.today();
-        cmdtRecord.ExampleDatetimeField__c = System.now();
+        CustomMetadataDeployTest__mdt cmdtRecord = new CustomMetadataDeployTest__mdt(
+            MasterLabel = 'my test cmdt record',
+            DeveloperName = 'my_test_cmdt_record',
+            ExampleCheckboxField__c = true,
+            ExampleDateField__c = System.today(),
+            ExampleDatetimeField__c = System.now(),
+            ExampleTextField__c = 'hello'
+        );
 
         List<CustomMetadataDeployTest__mdt> cdmtRecords = new List<CustomMetadataDeployTest__mdt>{ cmdtRecord };
 
