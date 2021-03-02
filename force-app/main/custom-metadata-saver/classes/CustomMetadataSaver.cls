@@ -73,7 +73,7 @@ public inherited sharing class CustomMetadataSaver {
             if (field.getDescribe().getType() == Schema.DisplayType.PICKLIST) {
                 value = String.valueOf(customMetadataRecord.get(field));
             } else {
-                value = customMetadataRecord.getPopulatedFieldsAsMap().get(fieldName);
+                value = customMetadataRecord.get(fieldName);
             }
 
             Metadata.CustomMetadataValue customField = new Metadata.CustomMetadataValue();
