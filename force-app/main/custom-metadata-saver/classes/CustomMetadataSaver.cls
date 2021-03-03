@@ -4,8 +4,13 @@
 //----------------------------------------------------------------------------------------------------//
 
 public inherited sharing class CustomMetadataSaver {
-    private static final Set<String> IGNORED_FIELD_NAMES = getIgnoredFieldNames();
     private static final List<String> DEPLOYMENT_JOB_IDS = new List<String>();
+    private static final Set<String> IGNORED_FIELD_NAMES = getIgnoredFieldNames();
+
+    public class FlowInput {
+        @InvocableVariable(required=true label='The collection of custom metadata type records to deploy')
+        public List<SObject> customMetadataRecords;
+    }
 
     private CustomMetadataSaver() {
         //static only
@@ -16,12 +21,12 @@ public inherited sharing class CustomMetadataSaver {
         label='Deploy Changes to Custom Metadata Records'
         description='Deploys changes to the list of custom metadata records'
     )
-    public static void deploy(List<List<SObject>> customMetadataRecordsLists) {
-        System.debug('customMetadataRecordsLists==' + customMetadataRecordsLists);
+    public static void deploy(List<FlowInput> inputs) {
+        System.debug('inputs==' + inputs);
 
         List<SObject> consolidatedList = new List<SObject>();
-        for (List<SObject> customMetadataRecordsList : customMetadataRecordsLists) {
-            consolidatedList.addAll(customMetadataRecordsList);
+        for (FlowInput input : inputs) {
+            consolidatedList.addAll(input.customMetadataRecords);
         }
 
         System.debug('consolidatedList==' + consolidatedList);
