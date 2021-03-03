@@ -188,10 +188,13 @@ public inherited sharing class CustomMetadataSaver {
             System.debug('deploy result==' + result);
             System.debug('deploy callback context==' + context);
 
+            System.debug('this.sendEmailOnError==' + this.sendEmailOnError);
+            System.debug('this.sendEmailOnSuccess==' + this.sendEmailOnSuccess);
+
             this.success = result.success;
 
             // Build the email pieces
-            String subject = 'Custom metadata type deployment';
+            String subject = 'Custom metadata type deployment completed';
             String textBody = 'Deployment ID {0} completed\nStatus: {1}\n{2} total items deployed\n{3} items failed\nDetails: {4}';
             List<Object> textReplacements = new List<Object>{
                 result.id,
@@ -203,7 +206,7 @@ public inherited sharing class CustomMetadataSaver {
             textBody = String.format(textBody, textReplacements);
 
             // Send the email
-            if (result.status == Metadata.DeployStatus.SUCCEEDED && this.sendEmailOnSuccess == true) {
+            if (result.success == true && this.sendEmailOnSuccess == true) {
                 System.debug('Deployment Succeeded!');
 
                 sendEmail(subject, textBody);
