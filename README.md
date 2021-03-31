@@ -51,3 +51,53 @@ Since Apex can already update custom metadata records (it just can't save the ch
     // Bonus, get the deployment job IDs if you want to monitor them
     List<Id> deploymentJobIds = CustomMetadataSaver.getDeploymentJobIds();
 ```
+
+## Custom Deployment Callback
+
+When deploying metadata through Apex, Salesforce provides the ability to create a callback class using [Metadata.DeployCallback](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_interface_Metadata_DeployCallback.htm).
+
+### Using the Default Callback
+
+Out-of-the-box, this `CustomMetadataSaver` uses a `private` inner class, `CustomMetadataSaver.DefaultDeployCallback`, when deploying CMDT records. It provides 2 options:
+
+-   `sendEmailOnError` - sends an email to the current user when there are 1 or more deployment errors
+-   `sendEmailOnSuccess` - sends an email to the current user when there are no deployment errors
+
+### Using Your Own Custom Callback
+
+To use your own custom Apex class for the callback, first create your class similar to this example
+
+```java
+public class ExampleCallback implements Metadata.DeployCallback {
+
+    public void handleResult(Metadata.DeployResult result, Metadata.DeployCallbackContext context) {
+        System.debug('ExampleCallback is running!');
+    }
+}
+
+```
+
+Then you can provide your class in Apex using an overload of the method `CustomMetadataSaver.deploy()`;
+
+```java
+// Create your CMDT records
+List<CustomMetadataDeployTest__mdt> myCMDTRecords = new List<CustomMetadataDeployTest__mdt>();
+
+CustomMetadataDeployTest__mdt myExampleCMDT = new CustomMetadataDeployTest__mdt();
+myExampleCMDT.MasterLabel = 'My CMDT Record';
+myExampleCMDT.DeveloperName = 'My_CMDT_Record';
+myExampleCMDT.ExampleTextField__c = 'Some value';
+
+myCMDTRecords.add(myExampleCMDT);
+
+// Create an instance of your custom callback class
+ExampleCallback myCustomCallback = new ExampleCallback();
+
+// Pass the CMDT records and your custom callback to CustomMetadataSaver
+CustomMetadataSaver.deploy(myCMDTRecords, myCustomCallback);
+
+```
+
+Within Flow, you can also specify a custom callback class by specifying the Apex class name within the deploy action
+
+![Flow: Deploy with Custom Callback](./content/flow-deploy-with-custom-callback.png)
