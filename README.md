@@ -77,7 +77,7 @@ public class ExampleCallback implements Metadata.DeployCallback {
 
 ```
 
-Then you can provide your class in Apex using an overload of the method `CustomMetadataSaver.deploy()`;
+Within Apex, you can then pass an instance of your class as a parameter to the method `CustomMetadataSaver.deploy()`
 
 ```java
 // Create your CMDT records
