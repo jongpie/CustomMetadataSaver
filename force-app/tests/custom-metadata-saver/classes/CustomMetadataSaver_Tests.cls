@@ -41,6 +41,8 @@ private class CustomMetadataSaver_Tests {
         List<CustomMetadataDeployTest__mdt> cdmtRecords = new List<CustomMetadataDeployTest__mdt>{ cmdtRecord };
         CustomMetadataSaver.FlowInput input = new CustomMetadataSaver.FlowInput();
         input.customMetadataRecords = cdmtRecords;
+        input.sendEmailOnError = true;
+        input.sendEmailOnSuccess = true;
 
         List<CustomMetadataSaver.FlowInput> inputs = new List<CustomMetadataSaver.FlowInput>();
         inputs.add(input);
@@ -48,9 +50,55 @@ private class CustomMetadataSaver_Tests {
         System.assertEquals(1, cdmtRecords.size());
 
         Test.startTest();
-        CustomMetadataSaver.deploy(cdmtRecords);
+        CustomMetadataSaver.deploy(inputs);
         Test.stopTest();
 
         System.assertEquals(1, CustomMetadataSaver.getDeploymentJobIds().size());
+    }
+
+    @isTest
+    static void it_should_handle_deploy_success() {
+        // Instantiate the callback.
+        Boolean sendEmailOnError = true;
+        Boolean sendEmailOnSuccess = true;
+        CustomMetadataSaver.DefaultDeployCallback callback = new CustomMetadataSaver.DefaultDeployCallback(sendEmailOnError, sendEmailOnSuccess);
+
+        // Create test result and context objects.
+        Metadata.DeployResult result = new Metadata.DeployResult();
+        result.success = true;
+        result.numberComponentsTotal = 5;
+        result.numberComponentErrors = 0;
+        Metadata.DeployCallbackContext context = new Metadata.DeployCallbackContext();
+
+        System.assertEquals(null, callback.success);
+
+        Test.startTest();
+        callback.handleResult(result, context);
+        Test.stopTest();
+
+        System.assertEquals(true, callback.success);
+    }
+
+    @isTest
+    static void it_should_handle_deploy_error() {
+        // Instantiate the callback
+        Boolean sendEmailOnError = true;
+        Boolean sendEmailOnSuccess = true;
+        CustomMetadataSaver.DefaultDeployCallback callback = new CustomMetadataSaver.DefaultDeployCallback(sendEmailOnError, sendEmailOnSuccess);
+
+        // Setup the deploy result and context objects
+        Metadata.DeployResult result = new Metadata.DeployResult();
+        result.success = false;
+        result.numberComponentsTotal = 5;
+        result.numberComponentErrors = 2;
+        Metadata.DeployCallbackContext context = new Metadata.DeployCallbackContext();
+
+        System.assertEquals(null, callback.success);
+
+        Test.startTest();
+        callback.handleResult(result, context);
+        Test.stopTest();
+
+        System.assertEquals(false, callback.success);
     }
 }
