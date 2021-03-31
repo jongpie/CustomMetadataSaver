@@ -48,7 +48,7 @@ private class CustomMetadataSaver_Tests {
         System.assertEquals(1, cdmtRecords.size());
 
         Test.startTest();
-        CustomMetadataSaver.deploy(cdmtRecords);
+        CustomMetadataSaver.deploy(inputs);
         Test.stopTest();
 
         System.assertEquals(1, CustomMetadataSaver.getDeploymentJobIds().size());
