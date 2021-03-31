@@ -41,6 +41,8 @@ private class CustomMetadataSaver_Tests {
         List<CustomMetadataDeployTest__mdt> cdmtRecords = new List<CustomMetadataDeployTest__mdt>{ cmdtRecord };
         CustomMetadataSaver.FlowInput input = new CustomMetadataSaver.FlowInput();
         input.customMetadataRecords = cdmtRecords;
+        input.sendEmailOnError = true;
+        input.sendEmailOnSuccess = true;
 
         List<CustomMetadataSaver.FlowInput> inputs = new List<CustomMetadataSaver.FlowInput>();
         inputs.add(input);
