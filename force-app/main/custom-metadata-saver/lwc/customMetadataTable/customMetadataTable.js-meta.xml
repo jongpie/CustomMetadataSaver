@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>52.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightning__FlowScreen</target>
+        <target>lightning__Tab</target>
+    </targets>
+    <targetConfigs>
+    <targetConfig targets="lightning__FlowScreen" configurationEditor="c-custom-metadata-table-configurator">
+            <propertyType name="T" extends="SObject" label="Input Type" description="Generic sObject data type used for input sObject properties" />
+                <!-- role="inputOnly" -->
+            <property
+                name="records"
+                type="{T[]}"
+                label="CMDT Record Collection"
+                description="The collection of custom metadata records to display in a table"
+            />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

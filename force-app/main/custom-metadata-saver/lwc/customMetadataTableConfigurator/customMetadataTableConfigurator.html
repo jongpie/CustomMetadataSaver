@@ -1,0 +1,19 @@
+<template>
+    <lightning-combobox
+        name="inputType"
+        label="Object for Record Variable"
+        value={inputType}
+        placeholder="Select object..."
+        options={typeOptions}
+        onchange={handleInputTypeChange}>
+    </lightning-combobox>
+
+    <lightning-combobox
+        name="inputValue"
+        label="Record Variable"
+        value={inputValue}
+        placeholder="Select record variable..."
+        options={valueOptions}
+        onchange={handleValueChange}>
+    </lightning-combobox>
+</template>

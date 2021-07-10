@@ -1,0 +1,27 @@
+<template>
+    <lightning-card title={title}>
+        [deploying: {isDeploying}]
+        [deploymentId: {deploymentId}]
+        [inputType: {inputType}]
+        <lightning-datatable
+            columns={columns}
+            data={records}
+            default-sort-direction={defaultSortDirection}
+            draft-values={draftValues}
+            hide-checkbox-column
+            isloading={isDeploying}
+            key-field="DeveloperName"
+            onsave={handleSave}
+            onsort={handleSort}
+            show-row-number-column
+            sorted-by={sortedBy}
+            sorted-direction={sortedDirection}
+        >
+        </lightning-datatable>
+    </lightning-card>
+
+    <!-- <template if:true={isDeploying}>
+        <div>Deploying CMDT records</div>
+        <lightning-spinner alternative-text="Please wait while CMDT records are deployed" title="Deploying..."></lightning-spinner>
+    </template> -->
+</template>
