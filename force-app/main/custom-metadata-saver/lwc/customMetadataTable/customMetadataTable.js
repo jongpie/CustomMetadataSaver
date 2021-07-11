@@ -17,12 +17,16 @@ export default class CustomMetadataTable extends LightningElement {
 
     @api
     records = [];
+    newRecord = {};
+    newRecordDeveloperName = 'test';
+    newRecordMasterLabel;
     _draftRecords;
 
     columns = ['DeveloperName'];
     defaultSortDirection = 'asc';
     sortedDirection;
     sortedBy;
+    shouldShowNewRecordModal = false;
 
     isDeploying = false;
     _deploymentStatus;
@@ -35,13 +39,31 @@ export default class CustomMetadataTable extends LightningElement {
             // TODO add error handling
             console.log('an error occurred');
         } else if (data) {
-            this._setTitle(data.label);
+            this._setTitle(data.labelPlural);
             this._loadColumns(data.fields);
         }
     }
 
-    addNew(event) {
-        // TODO
+    closeNewRecordModal(event) {
+        this.shouldShowNewRecordModal = false;
+    }
+
+    showNewRecordModal(event) {
+        this.shouldShowNewRecordModal = true;
+        this.newRecord = { DeveloperName: null, MasterLabel: null };
+    }
+
+    addNewRecord(event) {
+        this.newRecord.DeveloperName = this.newRecordDeveloperName;
+        this.newRecord.MasterLabel = this.newRecordMasterLabel;
+        console.log('this.newRecord==' + JSON.stringify(this.newRecord));
+
+        let records = JSON.parse(JSON.stringify(this.records));
+        records.unshift(this.newRecord);
+        this.records = records;
+
+        this.newRecord = {}
+        this.shouldShowNewRecordModal = false;
     }
 
     handleSort(event) {
@@ -61,9 +83,9 @@ export default class CustomMetadataTable extends LightningElement {
         }
     }
 
-    _setTitle(sobjectLabel) {
+    _setTitle(sobjectLabelPlural) {
         if (!this.title) {
-            this.title = sobjectLabel;
+            this.title = sobjectLabelPlural;
         }
     }
 
