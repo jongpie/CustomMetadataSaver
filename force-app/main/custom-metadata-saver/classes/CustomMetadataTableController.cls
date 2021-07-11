@@ -5,8 +5,13 @@
 
 public without sharing class CustomMetadataTableController {
     @AuraEnabled
-    public static String getCMDTObjectInfo(String sobjectDeveloperName) {
-        return null;
+    public static List<EntityDefinition> getCustomMetadataTypeEntities() {
+        return [
+            SELECT Id, Label, QualifiedApiName
+            FROM EntityDefinition
+            WHERE QualifiedApiName LIKE '%__mdt'
+            ORDER BY Label
+        ];
     }
 
     @AuraEnabled

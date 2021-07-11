@@ -1,80 +1,133 @@
 import { LightningElement, api, wire } from 'lwc';
-import getCMDTObjectInfo from '@salesforce/apex/CustomMetadataTableController.getCMDTObjectInfo';
-import deploy from '@salesforce/apex/CustomMetadataTableController.deploy'
+import { getObjectInfo } from 'lightning/uiObjectInfoApi';
+import deploy from '@salesforce/apex/CustomMetadataTableController.deploy';
 
 const columns = [
     { label: 'Developer Name', fieldName: 'DeveloperName', editable: false },
     { label: 'Label', fieldName: 'MasterLabel', editable: true },
+    { label: 'ExampleCheckboxField__c', fieldName: 'ExampleCheckboxField__c', type: 'checkbox', editable: true },
     { label: 'ExampleDateField__c', fieldName: 'ExampleDateField__c', type: 'date', editable: true },
+    { label: 'ExampleDatetimeField__c', fieldName: 'ExampleDatetimeField__c', type: 'datetime', editable: true },
     { label: 'ExampleEmailField__c', fieldName: 'ExampleEmailField__c', type: 'email', editable: true },
+    { label: 'ExampleNumberField__c', fieldName: 'ExampleNumberField__c', type: 'number', editable: true },
+    { label: 'ExamplePercentField__c', fieldName: 'ExamplePercentField__c', type: 'percent', editable: true },
     { label: 'ExamplePhoneField__c', fieldName: 'ExamplePhoneField__c', type: 'phone', editable: true },
-    { label: 'ExampleURLField__c', fieldName: 'ExampleURLField__c', type: 'url', editable: true },
-    // { label: 'Website', fieldName: 'website', type: 'url', editable: true },
-    // { label: 'Phone', fieldName: 'phone', type: 'phone', editable: true },
-    // { label: 'CloseAt', fieldName: 'closeAt', type: 'date', editable: true },
-    // { label: 'Balance', fieldName: 'amount', type: 'currency', editable: true },
+    { label: 'ExamplePicklistField__c', fieldName: 'ExamplePicklistField__c', type: 'picklist', editable: true },
+    { label: 'ExampleTextAreaField__c', fieldName: 'ExampleTextAreaField__c', type: 'textarea', editable: true },
+    { label: 'ExampleTextAreaLongField__c', fieldName: 'ExampleTextAreaLongField__c', type: 'textarea', editable: true },
+    { label: 'ExampleTextField__c', fieldName: 'ExampleTextField__c', type: 'text', editable: true },
+    { label: 'ExampleURLField__c', fieldName: 'ExampleURLField__c', type: 'url', editable: true }
 ];
 
 export default class CustomMetadataTable extends LightningElement {
-    @api 
+    // TODO remove hardcoding
+    @api
+    objectApiName = 'CustomMetadataDeployTest__mdt';
+
+    @api
+    title = '';
+
+    @api
+    fieldsToDisplay = '';
+
+    @api
     records = [];
 
-    @api
-    inputVariables;
-
-    @api
-    genericTypeMappings;
-    
-    @api
-    isDeploying = false;
-    
-    title = 'CMDT Object name';
-    draftValues;
-    deploymentId;
-    
-    defaultSortDirection = 'asc';
-    sortedDirection
-    sortedBy
-
-    // data = [];
     columns = columns;
+    defaultSortDirection = 'asc';
+    sortedDirection;
+    sortedBy;
 
-    // eslint-disable-next-line @lwc/lwc/no-async-await
-    async connectedCallback() {
-        // this.data = await fetchDataHelper({ amountOfRecords: 100 });
-    }
+    isDeploying = false;
+    deploymentId;
+    deploymentLink;
 
-    @wire(getCMDTObjectInfo, {
-        cmdtRecord: '$cmdtRecord'
-    })
-    wiredObjectInfo(result) {
-        if (result.data) {
-            // let queryResult = this.processResult(result.data);
-            // this.queryResult = queryResult;
-            // this.showComponent = queryResult.isAccessible;
-            // this.title = queryResult.labelPlural + ' (' + queryResult.totalLogEntriesCount + ' Total)';
-        } else if (result.error) {
-            // this.logEntryData = undefined;
-            // this.logEntryColumns = undefined;
-            // console.log(result.error);
+    _sobjectDescribe;
+    _sobjectFieldsByDeveloperName = new Map();
+
+    @wire(getObjectInfo, { objectApiName: '$objectApiName' })
+    currentObjectWire({ error, data }) {
+        if (error) {
+            // TODO add error handling
+            console.log('an error occurred');
+        } else if (data) {
+            this._sobjectDescribe = data;
+
+            this._sobjectFieldsByDeveloperName = new Map(Object.entries(this._sobjectDescribe.fields));
+            console.log('object info1!');
+            console.log(this._sobjectDescribe);
+            console.log(this._sobjectFieldsByDeveloperName);
+            this._setTitle();
+            this._loadDisplayFields();
         }
     }
 
+    handleSort(event) {
+        // TODO
+    }
+
+    handleSave(event) {
+        let updatedRecords = this._mergeDraftRecordChanges(event.detail.draftValues);
+        if (updatedRecords.length > 0) {
+            this._deployCustomMetadataRecords(updatedRecords);
+        }
+    }
+
+    _setTitle() {
+        if (!this.title) {
+            this.title = this._sobjectDescribe.label;
+        }
+    }
+
+    _loadDisplayFields() {
+        console.log('running _loadDisplayFields()');
+
+        let columnsToDisplay = [];
+        this.fieldsToDisplay
+            .replace(' ', '')
+            .split(',')
+            .forEach(fieldApiName => {
+                console.log('current fieldApiName==' + fieldApiName);
+                let field = this._sobjectFieldsByDeveloperName.get(fieldApiName);
+                console.log('current field==' + field);
+                // let column = {
+                //     label: field.label,
+                //     fieldName: fieldApiName,
+                //     editable: true,
+                //     type: field.dataType.toLowerCase()
+                // };
+                // columnsToDisplay.push(column);
+            });
+        console.log('columnsToDisplay==' + columnsToDisplay);
+        // this.columns = columnsToDisplay;
+    }
+
+    _mergeDraftRecordChanges(draftValues) {
+        var draftValuesByDeveloperName = draftValues.reduce(function (map, obj) {
+            map[obj.DeveloperName] = obj;
+            return map;
+        }, {});
+
+        let allRecords = [];
+        let updatedRecords = [];
+        this.records.forEach(record => {
+            let recordDraftValues = draftValuesByDeveloperName[record.DeveloperName];
+            if (recordDraftValues != null) {
+                let updatedRecord = { ...record, ...recordDraftValues };
+                updatedRecords.push(updatedRecord);
+            }
+        });
+
+        return updatedRecords;
+    }
+
     // call deploy method imperatively
-    handleDeploy(updatedRecords) {
-        // console.log('handleDeploy() -- this.records');
-        // console.table(this.records);
-        // console.log(JSON.stringify(this.records));
-        console.log('handleDeploy() -- updatedRecords');
-        console.table(updatedRecords);
-        console.log(JSON.stringify(updatedRecords));
-
-        
-
+    _deployCustomMetadataRecords(updatedRecords) {
         deploy({ customMetadataRecords: updatedRecords })
             .then(result => {
                 console.log('result==' + result);
                 this.deploymentId = result;
+                this.deploymentLink = '/' + result;
                 this.isDeploying = true;
             })
             .catch(error => {
@@ -82,118 +135,11 @@ export default class CustomMetadataTable extends LightningElement {
             });
     }
 
-    // https://developer.salesforce.com/docs/component-library/documentation/en/lwc/lwc.use_flow_custom_property_editor_sobject_lwc_example
-    get typeOptions() {
-        return [
-            { label: 'Account', value: 'Account' },
-            { label: 'Case', value: 'Case' },
-            { label: 'Lead', value: 'Lead' },
-        ];
-    }
-
-    get inputType() {
-        // const type = this.genericTypeMappings.find(
-        //     ({ typeName }) => typeName === 'T'
-        // );
-        // return type && type.typeValue;
-        return '';
-    }
-    handleInputTypeChange(event) {
-        if (event && event.detail) {
-            const newValue = event.detail.value;
-            const typeChangedEvent = new CustomEvent(
-                'configuration_editor_generic_type_mapping_changed',
-                {
-                    bubbles: true,
-                    cancelable: false,
-                    composed: true,
-                    detail: {
-                        typeName: 'T',
-                        typeValue: newValue
-                    },
-                }
-            );
-        this.dispatchEvent(typeChangedEvent);
+    async _checkDeploymentStatus() {
+        let deploymentFinished = false;
+        // TODO add retry/timeout check to see if deployment job is finished
+        if (deploymentFinished) {
+            this.template.querySelector('lightning-datatable').draftValues = [];
         }
-    }
-
-    handleSave(event) {
-        console.log('event.detail.draftValues');
-        console.table(event.detail.draftValues);
-        console.log(JSON.stringify(event.detail.draftValues));
-        
-        // Next, combine draft values with original object
-        // Example JSON of draft values:
-        // [{"ExampleEmailField__c":"asdfsd@test.com","DeveloperName":"No_Fields_Populated"}]
-        let updatedRecords = this.handleRecordChanges(event.detail.draftValues);
-        // Next, update this.records
-        
-        // And finally, deploy only changed records (if any)
-        
-        // this.isDeploying = true;
-        console.log('TODO deploy CMDT records');
-        console.log(JSON.stringify(updatedRecords));
-        console.log('and now calling handleDeploy()');
-        this.handleDeploy(updatedRecords);
-        // this.isDeploying = false;
-        console.log('this.draftValues');
-        console.table('this.draftValues==' + JSON.stringify(this.draftValues));
-
-        // this.template.querySelector("lightning-datatable").data = this.records;
-        this.template.querySelector("lightning-datatable").draftValues = [];
-    }
-
-    handleRecordChanges(draftValues) {
-        console.log('draftValues==');
-        console.log(JSON.stringify(draftValues));
-
-        var draftValuesByDeveloperName = draftValues.reduce(function(map, obj) {
-            console.log('obj');
-            console.log(obj);
-            map[obj.DeveloperName] = obj;
-            return map;
-        }, {});
-        console.log('draftValuesByDeveloperName==');
-        console.log(JSON.stringify(draftValuesByDeveloperName));
-
-        let allRecords = [];
-        let updatedRecords = [];
-        this.records.forEach((record) => {
-            console.log('gonna update a record');
-            console.log(JSON.stringify(record));
-
-            let devName = record.DeveloperName;
-            console.log('devName==' + devName);
-            let recordDraftValues = draftValuesByDeveloperName[devName];
-            console.log('recordDraftValues==');
-            console.log(JSON.stringify(recordDraftValues));
-            if (recordDraftValues != null) {
-                // recordDraftValues.forEach((draftValue, index) => {
-                //     record = {...record, ...draftValues};
-                // });
-                console.log('doing it!')
-                console.log('current record==' + JSON.stringify(record));
-                console.log('current draftValues==' + JSON.stringify(recordDraftValues));
-                let updatedRecord = {...record, ...recordDraftValues};
-                
-                // Object.keys(recordDraftValues)
-                //     // .forEach(key => record[key] = recordDraftValues[key]);
-                //     .forEach((key, index) => {
-                //         console.log(`Current index: ${index}`);
-                //         console.log('current key==' + key);
-                //         record[key] = recordDraftValues[key];
-                //     });
-                console.log('updated record==' + JSON.stringify(updatedRecord));
-                updatedRecords.push(updatedRecord);
-            }
-
-        });
-
-        return updatedRecords;
-
-    }
-
-    handleSort(event) {
-
     }
 }

@@ -1,13 +1,12 @@
 <template>
     <lightning-card title={title}>
-        [deploying: {isDeploying}]
-        [deploymentId: {deploymentId}]
-        [inputType: {inputType}]
+        [deploying: {isDeploying}] [deploymentId: {deploymentId}]
+        <template if:true={deploymentLink}> [<a href={deploymentLink} target="_blank">View Deployment</a>] </template>
+        [inputType: {inputType}] [fieldsToDisplay: {fieldsToDisplay}]
         <lightning-datatable
             columns={columns}
             data={records}
             default-sort-direction={defaultSortDirection}
-            draft-values={draftValues}
             hide-checkbox-column
             isloading={isDeploying}
             key-field="DeveloperName"
