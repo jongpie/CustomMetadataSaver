@@ -7,7 +7,36 @@
 
 This is a small library that can be used in Salesforce to update & deploy changes to custom metadata types (CMDT) from Apex and Flow.
 
-## Flow
+---
+
+## Updating & Deploying CMDT Records Using the LWC custom-metadata-table
+
+The included lwc `custom-metadata-table` is designed to work specifically with CMDT records. It includes 2 properties that you can set within Flow or your own lwc
+
+1. `records` - the `List<SObject>` CMDT records to display within the table
+2. `fieldToDisplay` - a comma-separated list of field API names that should be shown in the table. All fields, except `DeveloperName`, will be editable within the table
+
+Users can use this component to edit the CMDT records and simply click 'Save' to deploy any changes to the current org. This screenshot shows an example of the table, using the include CMDT object `CustomMetadataDeployTest__mdt`
+
+![LWC: Custom Metadata Table](./content/lwc-custom-metadata-table.png)
+
+### Using custom-metadata-table in Flow
+
+Within Flow, you can leverage the lwc `custom-metadata-table` in 2 steps
+
+1. Query the list of CMDT records to display and store them in a record collection variable
+
+    ![LWC: Flow Example](./content/lwc-flow-builder.png)
+
+2. Add a screen to display the `custom-metadata-table` component - here, you will provide the CMDT record collection variable and a comma-separated list of fields to display
+
+    ![LWC: Flow Table Properties](./content/lwc-flow-table-properties.png)
+
+---
+
+## Updating & Deploying CMDT Records Using Backend Automation
+
+### Flow
 
 Deploying CMDT changes from Flow consists of 2 actions
 
@@ -27,7 +56,7 @@ Deploying CMDT changes from Flow consists of 2 actions
 
 ![Flow: Deploy CMDT Records](./content/flow-deploy-cmdt-records.png)
 
-## Apex
+### Apex
 
 Since Apex can already update custom metadata records (it just can't save the changes using DML statements), it's fairly straightforward process to deploy the changes from Apex.
 
