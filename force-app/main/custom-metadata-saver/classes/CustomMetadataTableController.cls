@@ -7,6 +7,12 @@ public without sharing class CustomMetadataTableController {
     private static String BASE_URL = System.Url.getOrgDomainUrl().toExternalForm() + '/services/data/v49.0';
 
     @AuraEnabled
+    public static String getSObjectApiName(SObject customMetadataRecord) {
+        System.debug(LoggingLevel.INFO, 'CustomMetadataTableController.getSObjectApiName(customMetadataRecord)==' + customMetadataRecord);
+        return customMetadataRecord.getSObjectType().getDescribe().getName();
+    }
+
+    @AuraEnabled
     public static String deploy(List<SObject> customMetadataRecords) {
         System.debug(LoggingLevel.INFO, 'CustomMetadataTableController.deploy(customMetadataRecords)==' + customMetadataRecords);
         return CustomMetadataSaver.deploy(customMetadataRecords);
@@ -14,7 +20,7 @@ public without sharing class CustomMetadataTableController {
 
     @AuraEnabled
     public static DeploymentStatusResponse getDeploymentStatus(Id deploymentJobId) {
-        System.debug('deploymentJobId==' + deploymentJobId);
+        System.debug(LoggingLevel.INFO, 'deploymentJobId==' + deploymentJobId);
 
         final String deploymentStatusUrl = BASE_URL + '/metadata/deployRequest/' + deploymentJobId + '?includeDetails=true';
 

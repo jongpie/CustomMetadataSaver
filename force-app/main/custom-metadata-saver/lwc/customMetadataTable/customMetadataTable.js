@@ -1,13 +1,13 @@
 import { LightningElement, api, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { getObjectInfo } from 'lightning/uiObjectInfoApi';
+import getSObjectApiName from '@salesforce/apex/CustomMetadataTableController.getSObjectApiName';
 import deploy from '@salesforce/apex/CustomMetadataTableController.deploy';
 import getDeploymentStatus from '@salesforce/apex/CustomMetadataTableController.getDeploymentStatus';
 
 export default class CustomMetadataTable extends LightningElement {
-    // TODO remove hardcoding
     @api
-    objectApiName = 'CustomMetadataDeployTest__mdt';
+    objectApiName;
 
     @api
     title = '';
@@ -32,6 +32,18 @@ export default class CustomMetadataTable extends LightningElement {
     _deploymentStatus;
     _deploymentId;
     _resolvedDeploymentStatuses = ['Succeeded', 'Failed', 'Aborted'];
+
+    connectedCallback() {
+        let customMetadataRecord = this.records[0];
+        getSObjectApiName({customMetadataRecord : customMetadataRecord})
+        .then(result => {
+            console.log('result==' + result);
+            this.objectApiName = result;
+        })
+        .catch(error => {
+            // TODO error handling
+        });
+    }
 
     @wire(getObjectInfo, { objectApiName: '$objectApiName' })
     currentObjectWire({ error, data }) {
