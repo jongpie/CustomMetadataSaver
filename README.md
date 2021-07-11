@@ -9,7 +9,7 @@ This is a small library that can be used in Salesforce to update & deploy change
 
 ---
 
-## Updating & Deploying CMDT Records Using the LWC custom-metadata-table
+## Use Included LWC to Update CMDT Records
 
 The included lwc `custom-metadata-table` is designed to work specifically with CMDT records. It includes 2 properties that you can set within Flow or your own lwc
 
@@ -34,7 +34,7 @@ Within Flow, you can leverage the lwc `custom-metadata-table` in 2 steps
 
 ---
 
-## Updating & Deploying CMDT Records Using Backend Automation
+## Use Backend Automations to Update CMDT Records
 
 ### Flow
 
