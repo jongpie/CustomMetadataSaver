@@ -1,14 +1,15 @@
 <template>
     <lightning-card title={title}>
-        [deploying: {isDeploying}] [deploymentId: {deploymentId}]
-        <template if:true={deploymentLink}> [<a href={deploymentLink} target="_blank">View Deployment</a>] </template>
+        [deploying: {isDeploying}] <br />
+        [deploymentId: {deploymentId}] <br />
+        [deploymentStatus: {deploymentStatus}] <br />
+        <!-- <template if:true={deploymentLink}> [<a href={deploymentLink} target="_blank">View Deployment</a>] </template> -->
         [inputType: {inputType}] [fieldsToDisplay: {fieldsToDisplay}]
         <lightning-datatable
             columns={columns}
             data={records}
             default-sort-direction={defaultSortDirection}
             hide-checkbox-column
-            isloading={isDeploying}
             key-field="DeveloperName"
             onsave={handleSave}
             onsort={handleSort}
@@ -21,6 +22,6 @@
 
     <!-- <template if:true={isDeploying}>
         <div>Deploying CMDT records</div>
-        <lightning-spinner alternative-text="Please wait while CMDT records are deployed" title="Deploying..."></lightning-spinner>
+        <lightning-spinner title="Deploying..." alternative-text="Please wait while CMDT records are deployed"></lightning-spinner>
     </template> -->
 </template>

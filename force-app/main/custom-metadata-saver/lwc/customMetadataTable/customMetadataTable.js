@@ -1,13 +1,15 @@
 import { LightningElement, api, wire } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { getObjectInfo } from 'lightning/uiObjectInfoApi';
 import deploy from '@salesforce/apex/CustomMetadataTableController.deploy';
+import getDeploymentStatus from '@salesforce/apex/CustomMetadataTableController.getDeploymentStatus';
 
 const columns = [
     { label: 'Developer Name', fieldName: 'DeveloperName', editable: false },
     { label: 'Label', fieldName: 'MasterLabel', editable: true },
     { label: 'ExampleCheckboxField__c', fieldName: 'ExampleCheckboxField__c', type: 'checkbox', editable: true },
     { label: 'ExampleDateField__c', fieldName: 'ExampleDateField__c', type: 'date', editable: true },
-    { label: 'ExampleDatetimeField__c', fieldName: 'ExampleDatetimeField__c', type: 'datetime', editable: true },
+    { label: 'ExampleDatetimeField__c', fieldName: 'ExampleDatetimeField__c', type: 'date', editable: true },
     { label: 'ExampleEmailField__c', fieldName: 'ExampleEmailField__c', type: 'email', editable: true },
     { label: 'ExampleNumberField__c', fieldName: 'ExampleNumberField__c', type: 'number', editable: true },
     { label: 'ExamplePercentField__c', fieldName: 'ExamplePercentField__c', type: 'percent', editable: true },
@@ -41,6 +43,9 @@ export default class CustomMetadataTable extends LightningElement {
     isDeploying = false;
     deploymentId;
     deploymentLink;
+    deploymentStatusResponse;
+    deploymentStatus;
+    _resolvedDeploymentStatuses = ['Succeeded', 'Failed', 'Aborted'];
 
     _sobjectDescribe;
     _sobjectFieldsByDeveloperName = new Map();
@@ -66,10 +71,11 @@ export default class CustomMetadataTable extends LightningElement {
         // TODO
     }
 
-    handleSave(event) {
+    async handleSave(event) {
         let updatedRecords = this._mergeDraftRecordChanges(event.detail.draftValues);
         if (updatedRecords.length > 0) {
             this._deployCustomMetadataRecords(updatedRecords);
+            await this._getDeploymentStatus();
         }
     }
 
@@ -77,6 +83,22 @@ export default class CustomMetadataTable extends LightningElement {
         if (!this.title) {
             this.title = this._sobjectDescribe.label;
         }
+    }
+
+    _showToastEvent(variant, title, message, messageData) {
+        // const event = new ShowToastEvent({
+        //     title,
+        //     message,
+        //     variant
+        // });
+        const event = new ShowToastEvent({
+            title: 'Success',
+            message: 'Welcome',
+            variant: 'success',
+            mode : 'dismissable'
+    });
+    console.log('toast event==' + JSON.stringify(event));
+        this.dispatchEvent(event);
     }
 
     _loadDisplayFields() {
@@ -135,11 +157,41 @@ export default class CustomMetadataTable extends LightningElement {
             });
     }
 
-    async _checkDeploymentStatus() {
-        let deploymentFinished = false;
-        // TODO add retry/timeout check to see if deployment job is finished
-        if (deploymentFinished) {
-            this.template.querySelector('lightning-datatable').draftValues = [];
+    async _getDeploymentStatus() {
+        this.deploymentStatusResponse = await getDeploymentStatus({ deploymentJobId: this.deploymentId });
+        console.log('this.deploymentStatusResponse==' + JSON.stringify(this.deploymentStatusResponse));
+        if (this.deploymentStatusResponse && this.deploymentStatusResponse.deployResult) {
+            this.deploymentStatus = this.deploymentStatusResponse.deployResult.status;
         }
+        console.log('this.deploymentStatus==' + this.deploymentStatus);
+
+        // some arbitrary wait time - for a huge batch job, it could take ages to resolve
+        const statusPromise = new Promise(resolve => {
+            console.log('_resolvedDeploymentStatuses==' + this._resolvedDeploymentStatuses);
+            console.log('current status==' + this.deploymentStatus);
+            let timeoutId;
+            if (this._resolvedDeploymentStatuses.includes(this.deploymentStatus) == false) {
+                console.log('if!!');
+                timeoutId = setTimeout(() => this._getDeploymentStatus(), 3000);
+            } else {
+                console.log('else!!');
+                console.log('this.isDeploying==' + this.isDeploying);
+                this.isDeploying = null;
+                console.log('now this.isDeploying==' + this.isDeploying);
+
+                this._showToastEvent(
+                    'success',
+                    'Deployment Completed',
+                    ' CMDT records were successfully deployed'
+                    // this.deploymentStatusResponse.deployResult.numberComponentsTotal + ' CMDT records were successfully deployed'
+                );
+
+                this.template.querySelector('lightning-datatable').draftValues = [];
+                // return Promise.resolve();
+                clearTimeout(timeoutId);
+                resolve();
+            }
+        });
+        await statusPromise;
     }
 }
