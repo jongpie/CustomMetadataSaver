@@ -34,6 +34,7 @@ export default class CustomMetadataTable extends LightningElement {
 
     @api
     records = [];
+    _draftRecords;
 
     columns = columns;
     defaultSortDirection = 'asc';
@@ -71,8 +72,16 @@ export default class CustomMetadataTable extends LightningElement {
         // TODO
     }
 
+    handleCancel(event) {
+        // this._draftRecords = [];
+        this.template.querySelector('lightning-datatable').draftValues = [];
+    }
+
     async handleSave(event) {
-        let updatedRecords = this._mergeDraftRecordChanges(event.detail.draftValues);
+        const draftValues = this.template.querySelector('lightning-datatable').draftValues;
+        console.log('draftValues==' + JSON.stringify(draftValues));
+        let updatedRecords = this._mergeDraftRecordChanges(draftValues);
+        // let updatedRecords = this._mergeDraftRecordChanges(event.detail.draftValues);
         if (updatedRecords.length > 0) {
             this._deployCustomMetadataRecords(updatedRecords);
             await this._getDeploymentStatus();
@@ -125,18 +134,26 @@ export default class CustomMetadataTable extends LightningElement {
     }
 
     _mergeDraftRecordChanges(draftValues) {
+        if (!draftValues) {
+            return [];
+        }
+
         var draftValuesByDeveloperName = draftValues.reduce(function (map, obj) {
             map[obj.DeveloperName] = obj;
             return map;
         }, {});
 
-        let allRecords = [];
+        this._draftRecords = [];
         let updatedRecords = [];
         this.records.forEach(record => {
+
             let recordDraftValues = draftValuesByDeveloperName[record.DeveloperName];
             if (recordDraftValues != null) {
                 let updatedRecord = { ...record, ...recordDraftValues };
+                this._draftRecords.push(updatedRecord);
                 updatedRecords.push(updatedRecord);
+            } else {
+                this._draftRecords.push(record);
             }
         });
 
@@ -177,16 +194,19 @@ export default class CustomMetadataTable extends LightningElement {
                 console.log('else!!');
                 console.log('this.isDeploying==' + this.isDeploying);
                 this.isDeploying = null;
+                this.handleCancel();
+                this.records = this._draftRecords;
+                this.template.querySelector('lightning-datatable').data = this._draftRecords;
                 console.log('now this.isDeploying==' + this.isDeploying);
 
-                this._showToastEvent(
-                    'success',
-                    'Deployment Completed',
-                    ' CMDT records were successfully deployed'
-                    // this.deploymentStatusResponse.deployResult.numberComponentsTotal + ' CMDT records were successfully deployed'
-                );
+                // this._showToastEvent(
+                //     'success',
+                //     'Deployment Completed',
+                //     ' CMDT records were successfully deployed'
+                //     // this.deploymentStatusResponse.deployResult.numberComponentsTotal + ' CMDT records were successfully deployed'
+                // );
 
-                this.template.querySelector('lightning-datatable').draftValues = [];
+                // this.template.querySelector('lightning-datatable').draftValues = [];
                 // return Promise.resolve();
                 clearTimeout(timeoutId);
                 resolve();
