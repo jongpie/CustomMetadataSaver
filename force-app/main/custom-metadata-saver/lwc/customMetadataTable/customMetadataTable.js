@@ -186,16 +186,21 @@ export default class CustomMetadataTable extends LightningElement {
                 this.isDeploying = true;
                 this._deploymentId = result;
             })
+            .then(result => {
+                this._getDeploymentStatus();
+            })
             .catch(error => {
                 this.error = error;
             });
     }
 
     async _getDeploymentStatus() {
-        let deploymentStatusResponse = await getDeploymentStatus({ deploymentJobId: this._deploymentId });
-        console.log('deploymentStatusResponse==' + JSON.stringify(deploymentStatusResponse));
-        if (deploymentStatusResponse && deploymentStatusResponse.deployResult) {
-            this._deploymentStatus = deploymentStatusResponse.deployResult.status;
+        if (this._deploymentId) {
+            let deploymentStatusResponse = await getDeploymentStatus({ deploymentJobId: this._deploymentId });
+            console.log('deploymentStatusResponse==' + JSON.stringify(deploymentStatusResponse));
+            if (deploymentStatusResponse && deploymentStatusResponse.deployResult) {
+                this._deploymentStatus = deploymentStatusResponse.deployResult.status;
+            }
         }
 
         const statusPromise = new Promise(resolve => {

@@ -24,6 +24,11 @@
         </lightning-datatable>
     </lightning-card>
 
+    <template if:true={isDeploying}>
+        <div>Deploying CMDT records</div>
+        <lightning-spinner title="Deploying..." alternative-text="Please wait while CMDT records are deployed"></lightning-spinner>
+    </template>
+
     <template if:true={shouldShowNewRecordModal}>
         <!-- Modal/Popup Box LWC starts here -->
         <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
@@ -55,8 +60,4 @@
         </section>
         <div class="slds-backdrop slds-backdrop_open"></div>
     </template>
-    <!-- <template if:true={isDeploying}>
-        <div>Deploying CMDT records</div>
-        <lightning-spinner title="Deploying..." alternative-text="Please wait while CMDT records are deployed"></lightning-spinner>
-    </template> -->
 </template>
