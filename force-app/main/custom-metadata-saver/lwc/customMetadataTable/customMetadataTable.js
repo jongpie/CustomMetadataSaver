@@ -182,7 +182,7 @@ export default class CustomMetadataTable extends LightningElement {
     _deployCustomMetadataRecords(updatedRecords) {
         deploy({ customMetadataRecords: updatedRecords })
             .then(result => {
-                console.log('result==' + result);
+                console.log('enquequed deployment, deployment ID==' + result);
                 this.isDeploying = true;
                 this._deploymentId = result;
             })

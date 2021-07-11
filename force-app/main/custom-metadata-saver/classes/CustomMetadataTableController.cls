@@ -14,7 +14,9 @@ public without sharing class CustomMetadataTableController {
 
     @AuraEnabled
     public static DeploymentStatusResponse getDeploymentStatus(Id deploymentJobId) {
-        final String deploymentStatusUrl = BASE_URL + '/metadata/deployRequest/' + '0AfP0000017NpVnKAK' + '?includeDetails=true';
+        System.debug('deploymentJobId==' + deploymentJobId);
+
+        final String deploymentStatusUrl = BASE_URL + '/metadata/deployRequest/' + deploymentJobId + '?includeDetails=true';
 
         HttpRequest request = new HttpRequest();
         request.setEndpoint(deploymentStatusUrl);
