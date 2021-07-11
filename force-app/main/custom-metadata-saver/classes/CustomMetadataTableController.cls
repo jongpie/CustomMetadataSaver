@@ -7,11 +7,6 @@ public without sharing class CustomMetadataTableController {
     private static String BASE_URL = System.Url.getOrgDomainUrl().toExternalForm() + '/services/data/v49.0';
 
     @AuraEnabled
-    public static List<EntityDefinition> getCustomMetadataTypeEntities() {
-        return [SELECT Id, Label, QualifiedApiName FROM EntityDefinition WHERE QualifiedApiName LIKE '%__mdt' ORDER BY Label];
-    }
-
-    @AuraEnabled
     public static String deploy(List<SObject> customMetadataRecords) {
         System.debug(LoggingLevel.INFO, 'CustomMetadataTableController.deploy(customMetadataRecords)==' + customMetadataRecords);
         return CustomMetadataSaver.deploy(customMetadataRecords);
@@ -54,10 +49,4 @@ public without sharing class CustomMetadataTableController {
         @AuraEnabled
         public Integer numberComponentErrors;
     }
-
-    private class DeployComponentDetails {
-        public String componentFailures;
-        public Integer componentSuccesses;
-    }
-
 }

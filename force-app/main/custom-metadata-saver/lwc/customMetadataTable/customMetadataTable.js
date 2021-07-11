@@ -4,23 +4,6 @@ import { getObjectInfo } from 'lightning/uiObjectInfoApi';
 import deploy from '@salesforce/apex/CustomMetadataTableController.deploy';
 import getDeploymentStatus from '@salesforce/apex/CustomMetadataTableController.getDeploymentStatus';
 
-const columns = [
-    { label: 'Developer Name', fieldName: 'DeveloperName', editable: false },
-    { label: 'Label', fieldName: 'MasterLabel', editable: true },
-    { label: 'ExampleCheckboxField__c', fieldName: 'ExampleCheckboxField__c', type: 'checkbox', editable: true },
-    { label: 'ExampleDateField__c', fieldName: 'ExampleDateField__c', type: 'date', editable: true },
-    { label: 'ExampleDatetimeField__c', fieldName: 'ExampleDatetimeField__c', type: 'date', editable: true },
-    { label: 'ExampleEmailField__c', fieldName: 'ExampleEmailField__c', type: 'email', editable: true },
-    { label: 'ExampleNumberField__c', fieldName: 'ExampleNumberField__c', type: 'number', editable: true },
-    { label: 'ExamplePercentField__c', fieldName: 'ExamplePercentField__c', type: 'percent', editable: true },
-    { label: 'ExamplePhoneField__c', fieldName: 'ExamplePhoneField__c', type: 'phone', editable: true },
-    { label: 'ExamplePicklistField__c', fieldName: 'ExamplePicklistField__c', type: 'picklist', editable: true },
-    { label: 'ExampleTextAreaField__c', fieldName: 'ExampleTextAreaField__c', type: 'textarea', editable: true },
-    { label: 'ExampleTextAreaLongField__c', fieldName: 'ExampleTextAreaLongField__c', type: 'textarea', editable: true },
-    { label: 'ExampleTextField__c', fieldName: 'ExampleTextField__c', type: 'text', editable: true },
-    { label: 'ExampleURLField__c', fieldName: 'ExampleURLField__c', type: 'url', editable: true }
-];
-
 export default class CustomMetadataTable extends LightningElement {
     // TODO remove hardcoding
     @api
@@ -36,20 +19,15 @@ export default class CustomMetadataTable extends LightningElement {
     records = [];
     _draftRecords;
 
-    columns = columns;
+    columns = ['DeveloperName'];
     defaultSortDirection = 'asc';
     sortedDirection;
     sortedBy;
 
     isDeploying = false;
-    deploymentId;
-    deploymentLink;
-    deploymentStatusResponse;
-    deploymentStatus;
+    _deploymentStatus;
+    _deploymentId;
     _resolvedDeploymentStatuses = ['Succeeded', 'Failed', 'Aborted'];
-
-    _sobjectDescribe;
-    _sobjectFieldsByDeveloperName = new Map();
 
     @wire(getObjectInfo, { objectApiName: '$objectApiName' })
     currentObjectWire({ error, data }) {
@@ -57,15 +35,13 @@ export default class CustomMetadataTable extends LightningElement {
             // TODO add error handling
             console.log('an error occurred');
         } else if (data) {
-            this._sobjectDescribe = data;
-
-            this._sobjectFieldsByDeveloperName = new Map(Object.entries(this._sobjectDescribe.fields));
-            console.log('object info1!');
-            console.log(this._sobjectDescribe);
-            console.log(this._sobjectFieldsByDeveloperName);
-            this._setTitle();
-            this._loadDisplayFields();
+            this._setTitle(data.label);
+            this._loadColumns(data.fields);
         }
+    }
+
+    addNew(event) {
+        // TODO
     }
 
     handleSort(event) {
@@ -73,67 +49,89 @@ export default class CustomMetadataTable extends LightningElement {
     }
 
     handleCancel(event) {
-        // this._draftRecords = [];
         this.template.querySelector('lightning-datatable').draftValues = [];
     }
 
     async handleSave(event) {
         const draftValues = this.template.querySelector('lightning-datatable').draftValues;
-        console.log('draftValues==' + JSON.stringify(draftValues));
-        let updatedRecords = this._mergeDraftRecordChanges(draftValues);
-        // let updatedRecords = this._mergeDraftRecordChanges(event.detail.draftValues);
+        let updatedRecords = this._mergeDraftValues(draftValues);
         if (updatedRecords.length > 0) {
             this._deployCustomMetadataRecords(updatedRecords);
             await this._getDeploymentStatus();
         }
     }
 
-    _setTitle() {
+    _setTitle(sobjectLabel) {
         if (!this.title) {
-            this.title = this._sobjectDescribe.label;
+            this.title = sobjectLabel;
         }
     }
 
     _showToastEvent(variant, title, message, messageData) {
-        // const event = new ShowToastEvent({
-        //     title,
-        //     message,
-        //     variant
-        // });
         const event = new ShowToastEvent({
-            title: 'Success',
-            message: 'Welcome',
-            variant: 'success',
-            mode : 'dismissable'
-    });
-    console.log('toast event==' + JSON.stringify(event));
+            title,
+            message,
+            variant
+        });
+        console.log('toast event==' + JSON.stringify(event));
         this.dispatchEvent(event);
     }
 
-    _loadDisplayFields() {
-        console.log('running _loadDisplayFields()');
+    _loadColumns(fields) {
+        let sobjectFieldsByDeveloperName = new Map(Object.entries(fields));
+        this.columns = [];
 
-        let columnsToDisplay = [];
-        this.fieldsToDisplay
-            .replace(' ', '')
-            .split(',')
-            .forEach(fieldApiName => {
-                console.log('current fieldApiName==' + fieldApiName);
-                let field = this._sobjectFieldsByDeveloperName.get(fieldApiName);
-                console.log('current field==' + field);
-                // let column = {
-                //     label: field.label,
-                //     fieldName: fieldApiName,
-                //     editable: true,
-                //     type: field.dataType.toLowerCase()
-                // };
-                // columnsToDisplay.push(column);
-            });
-        console.log('columnsToDisplay==' + columnsToDisplay);
-        // this.columns = columnsToDisplay;
+        this.fieldsToDisplay.split(',').forEach(fieldApiName => {
+            fieldApiName = fieldApiName.trim();
+            let field = sobjectFieldsByDeveloperName.get(fieldApiName);
+            if (field) {
+                let column = this._generateColumn(field);
+                this.columns.push(column);
+            }
+        });
+        console.log('this.columns==' + JSON.stringify(this.columns));
     }
 
-    _mergeDraftRecordChanges(draftValues) {
+    _generateColumn(field) {
+        let column = {
+            label: field.label,
+            fieldName: field.apiName,
+            editable: field.apiName != 'DeveloperName',
+            type: field.dataType.toLowerCase()
+        };
+
+        switch (column.type) {
+            case 'date':
+                column.typeAttributes = {
+                    month: '2-digit',
+                    day: '2-digit',
+                    year: 'numeric'
+                };
+                break;
+            case 'datetime':
+                column.type = 'date';
+                // FIXME and make dynamic based on user prefences for datetimes
+                column.typeAttributes = {
+                    month: '2-digit',
+                    day: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                };
+                break;
+            case 'string':
+                column.type = 'text';
+                break;
+            case 'reference':
+                // TODO add support for editing EntityDefinition/FieldDefinition lookup fields
+                column.editable = false;
+                break;
+        }
+
+        return column;
+    }
+
+    _mergeDraftValues(draftValues) {
         if (!draftValues) {
             return [];
         }
@@ -146,7 +144,6 @@ export default class CustomMetadataTable extends LightningElement {
         this._draftRecords = [];
         let updatedRecords = [];
         this.records.forEach(record => {
-
             let recordDraftValues = draftValuesByDeveloperName[record.DeveloperName];
             if (recordDraftValues != null) {
                 let updatedRecord = { ...record, ...recordDraftValues };
@@ -160,14 +157,12 @@ export default class CustomMetadataTable extends LightningElement {
         return updatedRecords;
     }
 
-    // call deploy method imperatively
     _deployCustomMetadataRecords(updatedRecords) {
         deploy({ customMetadataRecords: updatedRecords })
             .then(result => {
                 console.log('result==' + result);
-                this.deploymentId = result;
-                this.deploymentLink = '/' + result;
                 this.isDeploying = true;
+                this._deploymentId = result;
             })
             .catch(error => {
                 this.error = error;
@@ -175,39 +170,22 @@ export default class CustomMetadataTable extends LightningElement {
     }
 
     async _getDeploymentStatus() {
-        this.deploymentStatusResponse = await getDeploymentStatus({ deploymentJobId: this.deploymentId });
-        console.log('this.deploymentStatusResponse==' + JSON.stringify(this.deploymentStatusResponse));
-        if (this.deploymentStatusResponse && this.deploymentStatusResponse.deployResult) {
-            this.deploymentStatus = this.deploymentStatusResponse.deployResult.status;
+        let deploymentStatusResponse = await getDeploymentStatus({ deploymentJobId: this._deploymentId });
+        console.log('deploymentStatusResponse==' + JSON.stringify(deploymentStatusResponse));
+        if (deploymentStatusResponse && deploymentStatusResponse.deployResult) {
+            this._deploymentStatus = deploymentStatusResponse.deployResult.status;
         }
-        console.log('this.deploymentStatus==' + this.deploymentStatus);
 
-        // some arbitrary wait time - for a huge batch job, it could take ages to resolve
         const statusPromise = new Promise(resolve => {
-            console.log('_resolvedDeploymentStatuses==' + this._resolvedDeploymentStatuses);
-            console.log('current status==' + this.deploymentStatus);
             let timeoutId;
-            if (this._resolvedDeploymentStatuses.includes(this.deploymentStatus) == false) {
-                console.log('if!!');
-                timeoutId = setTimeout(() => this._getDeploymentStatus(), 3000);
+            if (this._resolvedDeploymentStatuses.includes(this._deploymentStatus) == false) {
+                timeoutId = setTimeout(() => this._getDeploymentStatus(), 2000);
             } else {
-                console.log('else!!');
-                console.log('this.isDeploying==' + this.isDeploying);
-                this.isDeploying = null;
                 this.handleCancel();
                 this.records = this._draftRecords;
-                this.template.querySelector('lightning-datatable').data = this._draftRecords;
-                console.log('now this.isDeploying==' + this.isDeploying);
+                this.isDeploying = null;
 
-                // this._showToastEvent(
-                //     'success',
-                //     'Deployment Completed',
-                //     ' CMDT records were successfully deployed'
-                //     // this.deploymentStatusResponse.deployResult.numberComponentsTotal + ' CMDT records were successfully deployed'
-                // );
-
-                // this.template.querySelector('lightning-datatable').draftValues = [];
-                // return Promise.resolve();
+                this._showToastEvent('success', 'Deployment Completed', 'CMDT records were successfully deployed');
                 clearTimeout(timeoutId);
                 resolve();
             }

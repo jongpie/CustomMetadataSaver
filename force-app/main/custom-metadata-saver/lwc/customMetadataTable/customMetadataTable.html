@@ -1,26 +1,14 @@
 <template>
-    <lightning-card title={title}>
-        [deploying: {isDeploying}] <br />
-        [deploymentId: {deploymentId}] <br />
-        [deploymentStatus: {deploymentStatus}] <br />
-        <!-- <template if:true={deploymentLink}> [<a href={deploymentLink} target="_blank">View Deployment</a>] </template> -->
-        [inputType: {inputType}] [fieldsToDisplay: {fieldsToDisplay}]
-        <div slot="actions">
-            <lightning-button-group>
-                <lightning-button
-                    icon-name="utility:save"
-                    label="Deploy"
-                    onclick={handleSave}
-                    title="Deploy Custom Metadata"
-                    variant="brand"
-                ></lightning-button>
-                <lightning-button
-                    label="Cancel"
-                    onclick={handleCancel}
-                    title="Discard Custom Metadata Changes"
-                ></lightning-button>
-            </lightning-button-group>
-        </div>
+    <lightning-card title={title} icon-name="standard:bundle_config">
+        <!-- <div slot="actions">
+            <lightning-button
+                icon-name="action:new"
+                label="New"
+                onclick={addNew}
+                title="New Custom Metadata Record"
+                variant="brand-outline"
+            ></lightning-button>
+        </div> -->
         <lightning-datatable
             columns={columns}
             data={records}
