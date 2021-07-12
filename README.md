@@ -11,15 +11,22 @@ This is a small library that can be used in Salesforce to update & deploy change
 
 ## Use Included Lightning Web Component to Update CMDT Records
 
-The included lwc `custom-metadata-table` is designed to work specifically with CMDT records. It includes 2 properties that you can set within Flow or your own lightning component
+The included lwc `custom-metadata-table` is designed to work specifically with CMDT records. It includes 3 properties that you can set within Flow or your own lightning component
 
-1. `records` - the `List<SObject>` CMDT records to display within the table
-2. `fieldToDisplay` - a comma-separated list of field API names that should be shown in the table. All fields, except `DeveloperName` and lookup fields, will be editable within the table
+1. `records` - an instance of `List<SObject>` in Apex, or a 'record collection' within Flow, containing the CMDT records to display within the table.
+    - All of the `SObject` records must be of the same `SObject Type`.
+    - You can create or query the list of CMDT records - see README for details on how to create CMDT records in Apex and Flow.
+    - When creating new CMDT records, you must populate both fields `DeveloperName` and `MasterLabel` in order to successfully deploy the new records.
+2. `fieldToDisplay` - a comma-separated list of field API names that should be shown in the table.
+    - When the parameter `enableEditing == true`, all fields, except `DeveloperName` and lookup fields, will be editable within the table. This is done via the `lightning-datatable`'s inline-editing functionality
+3. `enableEditing` - Boolean value to control if CMDT records are displayed in read-only mode (`enableEditing == false`) or with inline-editing enabled (`enableEditing == true`)
 
-Users can use this component to edit the CMDT records and simply click 'Save' to deploy any changes to the current org. The component then displays a loading-spinner while the deployment runs - it continues to check the deployment status until the deployment is done (either it suceeds or it fails). In order to check the deployment's status, the component makes a callout to the REST API in your org - this is necessary because the deployment status cannot be checked natively within Apex. Depending on your org, some additional configuration may be needed to allow the callouts:
- - Org uses "My Domain": no additional changes should be required in your org - orgs with the "My Domain" feature configured can already make callouts to the same org without any additional configuration
- - Org does not use "My Domain": in your org, configure a Remote Site Setting - the URL of the remote site setting should be the URL of your Salesforce org
+Users can use this component to edit the CMDT records and simply click 'Save' to deploy any changes to the current org. The component then displays a loading-spinner while the deployment runs - it continues to check the deployment status until the deployment is done (either it suceeds or it fails).
 
+In order to check the deployment's status, the component makes callouts to the REST API in your org - this is necessary because the deployment status cannot be checked natively within Apex. Depending on your org, some additional configuration may be needed to allow the callouts:
+
+-   Org uses "My Domain": no additional changes should be required in your org - orgs with the "My Domain" feature configured can already make callouts to the same org without any additional configuration
+-   Org does not use "My Domain": in your org, configure a Remote Site Setting - the URL of the remote site setting should be the URL of your Salesforce org
 
 This screenshot shows an example of the table, using the include CMDT object `CustomMetadataDeployTest__mdt`
 

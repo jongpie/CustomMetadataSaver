@@ -16,6 +16,9 @@ export default class CustomMetadataTable extends LightningElement {
     fieldsToDisplay = '';
 
     @api
+    enableEditing = false;
+
+    @api
     records = [];
     newRecord = {};
     newRecordDeveloperName = 'test';
@@ -34,6 +37,10 @@ export default class CustomMetadataTable extends LightningElement {
     _resolvedDeploymentStatuses = ['Succeeded', 'Failed', 'Aborted'];
 
     connectedCallback() {
+        // For SObject and List<SObject> variables in Flow, Flow Builder automatically asks
+        // admins for the SObject Type - but this isn't exposed to lwc without using custom property editors (CPE),
+        // which are terrible - 2/10 stars, would not recommend to a friend
+        // Use the 1st record + Apex to dynamically determine the SObjectType
         let customMetadataRecord = this.records[0];
         getSObjectApiName({customMetadataRecord : customMetadataRecord})
         .then(result => {
@@ -46,7 +53,7 @@ export default class CustomMetadataTable extends LightningElement {
     }
 
     @wire(getObjectInfo, { objectApiName: '$objectApiName' })
-    currentObjectWire({ error, data }) {
+    getSObjectDescribe({ error, data }) {
         if (error) {
             // TODO add error handling
             console.log('an error occurred');
@@ -130,7 +137,7 @@ export default class CustomMetadataTable extends LightningElement {
         let column = {
             label: field.label,
             fieldName: field.apiName,
-            editable: field.apiName != 'DeveloperName',
+            editable: this.enableEditing && field.apiName != 'DeveloperName',
             type: field.dataType.toLowerCase()
         };
 
