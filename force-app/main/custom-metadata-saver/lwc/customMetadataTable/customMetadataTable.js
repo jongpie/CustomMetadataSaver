@@ -153,6 +153,12 @@ export default class CustomMetadataTable extends LightningElement {
                     minute: '2-digit'
                 };
                 break;
+            case 'picklist':
+                // TODO get picklist values for field
+                // column.typeAttributes = {
+                //     options: field
+                // };
+                break;
             case 'string':
                 column.type = 'text';
                 break;

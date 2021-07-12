@@ -29,11 +29,11 @@
         <lightning-spinner title="Deploying..." alternative-text="Please wait while CMDT records are deployed"></lightning-spinner>
     </template>
 
-    <template if:true={shouldShowNewRecordModal}>
-        <!-- Modal/Popup Box LWC starts here -->
+    <!-- <template if:true={shouldShowNewRecordModal}>
+        <- Modal/Popup Box LWC starts here ->
         <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
             <div class="slds-modal__container">
-                <!-- Modal/Popup Box LWC header here -->
+                <- Modal/Popup Box LWC header here ->
                 <header class="slds-modal__header">
                     <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeNewRecordModal}>
                         <lightning-icon icon-name="utility:close"
@@ -44,14 +44,14 @@
                     </button>
                     <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Modal/PopUp Box header LWC</h2>
                 </header>
-                <!-- Modal/Popup Box LWC body starts here -->
+                <- Modal/Popup Box LWC body starts here ->
                 <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
                     <lightning-card>
                         <lightning-input type="text" name="DeveloperName" required="true" label="Dev Name" value={newRecordDeveloperName}></lightning-input>
                         <lightning-input type="text" name="MasterLabel" required="true" label="Label" value={newRecordMasterLabel}></lightning-input>
                     </lightning-card>
                 </div>
-                <!-- Modal/Popup Box LWC footer starts here -->
+                <- Modal/Popup Box LWC footer starts here ->
                 <footer class="slds-modal__footer">
                     <button class="slds-button slds-button_neutral" onclick={closeNewRecordModal} title="Cancel">Cancel</button>
                     <button class="slds-button slds-button_brand" onclick={addNewRecord} title="Add">Add</button>
@@ -59,5 +59,5 @@
             </div>
         </section>
         <div class="slds-backdrop slds-backdrop_open"></div>
-    </template>
+    </template> -->
 </template>
