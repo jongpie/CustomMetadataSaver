@@ -37,7 +37,7 @@ public without sharing class CustomMetadataTableController {
     }
 
     @AuraEnabled
-    public static DeploymentStatusResponse getDeploymentStatus(Id deploymentJobId) {
+    public static DeploymentStatusResponse getDeploymentStatus(String deploymentJobId) {
         System.debug(LoggingLevel.INFO, 'deploymentJobId==' + deploymentJobId);
 
         final String deploymentStatusUrl = BASE_URL + '/metadata/deployRequest/' + deploymentJobId + '?includeDetails=true';
@@ -73,7 +73,7 @@ public without sharing class CustomMetadataTableController {
         public DeployResult deployResult;
     }
 
-    private class DeployResult {
+    public class DeployResult {
         @AuraEnabled
         public String status;
         @AuraEnabled
