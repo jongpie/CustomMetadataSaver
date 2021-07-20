@@ -2,6 +2,7 @@ import { LightningElement, api, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { getObjectInfo } from 'lightning/uiObjectInfoApi';
 import getSObjectApiName from '@salesforce/apex/CustomMetadataTableController.getSObjectApiName';
+// import getPicklistOptions from '@salesforce/apex/CustomMetadataTableController.getPicklistOptions';
 import deploy from '@salesforce/apex/CustomMetadataTableController.deploy';
 import getDeploymentStatus from '@salesforce/apex/CustomMetadataTableController.getDeploymentStatus';
 
@@ -32,7 +33,7 @@ export default class CustomMetadataTable extends LightningElement {
     shouldShowNewRecordModal = false;
 
     isDeploying = false;
-    _deploymentStatus;
+    deploymentStatus;
     _deploymentId;
     _resolvedDeploymentStatuses = ['Succeeded', 'Failed', 'Aborted'];
 
@@ -119,7 +120,11 @@ export default class CustomMetadataTable extends LightningElement {
     }
 
     _loadColumns(fields) {
+        console.log('fields==');
+        console.log(fields);
         let sobjectFieldsByDeveloperName = new Map(Object.entries(fields));
+        console.log('sobjectFieldsByDeveloperName==');
+        console.log(sobjectFieldsByDeveloperName);
         this.columns = [];
 
         this.fieldsToDisplay.split(',').forEach(fieldApiName => {
@@ -143,11 +148,7 @@ export default class CustomMetadataTable extends LightningElement {
 
         switch (column.type) {
             case 'date':
-                column.typeAttributes = {
-                    month: '2-digit',
-                    day: '2-digit',
-                    year: 'numeric'
-                };
+                column.type = 'date-local';
                 break;
             case 'datetime':
                 column.type = 'date';
@@ -161,10 +162,23 @@ export default class CustomMetadataTable extends LightningElement {
                 };
                 break;
             case 'picklist':
-                // TODO get picklist values for field
-                // column.typeAttributes = {
-                //     options: field
-                // };
+                // https://live.playg.app/play/picklist-in-lightning-datatable
+                // getPicklistOptions(this.objectApiName, field.fieldName).then(result => {
+                    console.log('picklistOptions==');
+                    // console.log(result);
+                    column.typeAttributes = {
+                        // options: result
+                        options: [
+                            { label: 'Hot', value: 'Hot' },
+                            { label: 'Warm', value: 'Warm' },
+                            { label: 'Cold', value: 'Cold' }
+                        ],
+                        value : { fieldName: column.fieldName },
+                        context : { fieldName: 'DeveloperName' }
+                    };
+                    console.log(column.typeAttributes);
+                    console.log(column.typeAttributes.options);
+                // });
                 break;
             case 'string':
                 column.type = 'text';
@@ -224,13 +238,13 @@ export default class CustomMetadataTable extends LightningElement {
             let deploymentStatusResponse = await getDeploymentStatus({ deploymentJobId: this._deploymentId });
             console.log('deploymentStatusResponse==' + JSON.stringify(deploymentStatusResponse));
             if (deploymentStatusResponse && deploymentStatusResponse.deployResult) {
-                this._deploymentStatus = deploymentStatusResponse.deployResult.status;
+                this.deploymentStatus = deploymentStatusResponse.deployResult.status;
             }
         }
 
         const statusPromise = new Promise(resolve => {
             let timeoutId;
-            if (this._resolvedDeploymentStatuses.includes(this._deploymentStatus) == false) {
+            if (this._resolvedDeploymentStatuses.includes(this.deploymentStatus) == false) {
                 timeoutId = setTimeout(() => this._getDeploymentStatus(), 2000);
             } else {
                 this.handleCancel();

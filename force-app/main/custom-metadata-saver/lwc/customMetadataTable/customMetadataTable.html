@@ -1,5 +1,11 @@
 <template>
     <lightning-card title={title} icon-name="standard:bundle_config">
+        <template if:true={deploymentStatus}>
+            <div slot="actions">
+                Deployment Status: {deploymentStatus}
+                <!-- <lightning-icon icon-name="action:approval" alternative-text="Approved" title="Approved" variant="success" size="xx-small"></lightning-icon> -->
+            </div>
+        </template>
         <!-- <div slot="actions">
             <lightning-button
                 icon-name="action:new"

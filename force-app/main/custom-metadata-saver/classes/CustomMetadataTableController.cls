@@ -8,9 +8,27 @@ public without sharing class CustomMetadataTableController {
 
     @AuraEnabled
     public static String getSObjectApiName(SObject customMetadataRecord) {
-        System.debug(LoggingLevel.INFO, 'CustomMetadataTableController.getSObjectApiName(customMetadataRecord)==' + customMetadataRecord);
+        System.debug(LoggingLevel.INFO, 'CustomMetadataTableController.getSObjectApiName(' + customMetadataRecord + ')');
         return customMetadataRecord.getSObjectType().getDescribe().getName();
     }
+
+    // @AuraEnabled(cacheable=true)
+    // public static List<PicklistOption> getPicklistOptions(String sobjectApiName, String fieldApiName) {
+    //     System.debug(LoggingLevel.INFO, 'CustomMetadataTableController.getPicklistOptions(' + sobjectApiName + ',' + fieldApiName + ')');
+
+    //     // Schema.PicklistEntry can't be returned by @AuraEnabled methods, so use an inner class PicklistOption instead
+    //     Schema.SObjectType sobjectType = ((SObject) Type.forName(sobjectApiName).newInstance()).getSObjectType();
+    //     List<Schema.PicklistEntry> schemaPicklistEntries = sobjectType.getDescribe().fields.getMap().get(fieldApiName).getDescribe().getPicklistValues();
+    //     List<PicklistOption> picklistOptions = new List<PicklistOption>();
+    //     for (Schema.PicklistEntry schemaPicklistEntry : schemaPicklistEntries) {
+    //         PicklistOption picklistOption = new PicklistOption();
+    //         picklistOption.label = schemaPicklistEntry.label;
+    //         picklistOption.value = schemaPicklistEntry.value;
+
+    //         picklistOptions.add(picklistOption);
+    //     }
+    //     return picklistOptions;
+    // }
 
     @AuraEnabled
     public static String deploy(List<SObject> customMetadataRecords) {
@@ -35,6 +53,14 @@ public without sharing class CustomMetadataTableController {
         System.debug(LoggingLevel.INFO, 'deploymentStatusResponse==' + deploymentStatusResponse);
         return deploymentStatusResponse;
     }
+
+    // DTO for picklist options since Schema.PicklistEntry isn't supported for aura-enabled methods
+    // public class PicklistOption {
+    //     @AuraEnabled
+    //     public String label;
+    //     @AuraEnabled
+    //     public String value;
+    // }
 
     // DTOs based on the REST API's response for deployments
     // https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_rest_deploy_checkstatus.htm
