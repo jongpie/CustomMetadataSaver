@@ -76,7 +76,13 @@ public inherited sharing class CustomMetadataSaver {
         Metadata.DeployCallback callback = getFlowDeployCallback(customCallbackName, sendEmailOnError, sendEmailOnSuccess);
         System.debug('callback==' + callback);
 
-        return new List<String>{ deploy(consolidatedCustomMetadataRecords, callback) };
+        // TODO need to add an actual Flow to the repo (./extra-tests/ directory probably) to verify Flow functionality works
+        String jobId = deploy(consolidatedCustomMetadataRecords, callback);
+        List<String> flowJobIds = new List<String>();
+        for (Integer i = 0; i < inputs.size(); i++) {
+            flowJobIds.add(jobId);
+        }
+        return flowJobIds;
     }
 
     public static String deploy(List<SObject> customMetadataRecords) {
