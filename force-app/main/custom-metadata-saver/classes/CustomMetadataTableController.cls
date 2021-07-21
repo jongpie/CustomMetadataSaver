@@ -82,5 +82,47 @@ public without sharing class CustomMetadataTableController {
         public Integer numberComponentsTotal;
         @AuraEnabled
         public Integer numberComponentErrors;
+        @AuraEnabled
+        public DeployResultDetails details;
+    }
+
+    public class DeployResultDetails {
+        @AuraEnabled
+        public List<ComponentResultDetail> allComponentMessages;
+        @AuraEnabled
+        public List<ComponentResultDetail> componentFailures;
+        @AuraEnabled
+        public List<ComponentResultDetail> componentSuccesses;
+    }
+
+    public class ComponentResultDetail {
+        @AuraEnabled
+        public String componentType;
+        @AuraEnabled
+        public String fullName;
+        @AuraEnabled
+        public String problem;
+        @AuraEnabled
+        public Boolean success;
+        @AuraEnabled
+        public Boolean warning;
+        @AuraEnabled
+        public Boolean created;
+        @AuraEnabled
+        public Boolean changed;
+        @AuraEnabled
+        public Boolean deleted;
+        @AuraEnabled
+        public Integer lineNumber;
+        @AuraEnabled
+        public Integer columnNumber;
+        @AuraEnabled
+        public Boolean requiresProductionTestRun;
+        @AuraEnabled
+        public Boolean knownPackagingProblem;
+        @AuraEnabled
+        public Boolean forPackageManifestFile;
+        @AuraEnabled
+        public String problemType;
     }
 }

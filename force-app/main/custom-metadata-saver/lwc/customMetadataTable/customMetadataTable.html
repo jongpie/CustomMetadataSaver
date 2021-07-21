@@ -1,8 +1,9 @@
 <template>
     <lightning-card title={title} icon-name="standard:bundle_config">
         <template if:true={deploymentStatus}>
-            <div slot="actions">
-                Deployment Status: {deploymentStatus}
+            <div slot="actions" class="slds-text-align_right">
+                Deployment Status: {deploymentStatus} <br />
+                {deploymentMessage}
                 <!-- <lightning-icon icon-name="action:approval" alternative-text="Approved" title="Approved" variant="success" size="xx-small"></lightning-icon> -->
             </div>
         </template>
@@ -31,7 +32,6 @@
     </lightning-card>
 
     <template if:true={isDeploying}>
-        <div>Deploying CMDT records</div>
         <lightning-spinner title="Deploying..." alternative-text="Please wait while CMDT records are deployed"></lightning-spinner>
     </template>
 

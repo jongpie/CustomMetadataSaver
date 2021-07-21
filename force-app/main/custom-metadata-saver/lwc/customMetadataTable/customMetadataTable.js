@@ -34,6 +34,7 @@ export default class CustomMetadataTable extends LightningElement {
 
     isDeploying = false;
     deploymentStatus;
+    deploymentMessage;
     _deploymentId;
     _resolvedDeploymentStatuses = ['Succeeded', 'Failed', 'Aborted'];
 
@@ -43,14 +44,14 @@ export default class CustomMetadataTable extends LightningElement {
         // which are terrible - 2/10 stars, would not recommend to a friend
         // Use the 1st record + Apex to dynamically determine the SObjectType
         let customMetadataRecord = this.records[0];
-        getSObjectApiName({customMetadataRecord : customMetadataRecord})
-        .then(result => {
-            console.log('result==' + result);
-            this.objectApiName = result;
-        })
-        .catch(error => {
-            // TODO error handling
-        });
+        getSObjectApiName({ customMetadataRecord: customMetadataRecord })
+            .then(result => {
+                console.log('result==' + result);
+                this.objectApiName = result;
+            })
+            .catch(error => {
+                // TODO error handling
+            });
     }
 
     @wire(getObjectInfo, { objectApiName: '$objectApiName' })
@@ -59,8 +60,10 @@ export default class CustomMetadataTable extends LightningElement {
             // TODO add error handling
             console.log('an error occurred');
         } else if (data) {
-            this._setTitle(data.labelPlural);
             this._loadColumns(data.fields);
+            if (!this.title) {
+                this.title = data.labelPlural;
+            }
         }
     }
 
@@ -82,7 +85,7 @@ export default class CustomMetadataTable extends LightningElement {
         records.unshift(this.newRecord);
         this.records = records;
 
-        this.newRecord = {}
+        this.newRecord = {};
         this.shouldShowNewRecordModal = false;
     }
 
@@ -100,12 +103,6 @@ export default class CustomMetadataTable extends LightningElement {
         if (updatedRecords.length > 0) {
             this._deployCustomMetadataRecords(updatedRecords);
             await this._getDeploymentStatus();
-        }
-    }
-
-    _setTitle(sobjectLabelPlural) {
-        if (!this.title) {
-            this.title = sobjectLabelPlural;
         }
     }
 
@@ -152,7 +149,6 @@ export default class CustomMetadataTable extends LightningElement {
                 break;
             case 'datetime':
                 column.type = 'date';
-                // FIXME and make dynamic based on user prefences for datetimes
                 column.typeAttributes = {
                     month: '2-digit',
                     day: '2-digit',
@@ -162,23 +158,11 @@ export default class CustomMetadataTable extends LightningElement {
                 };
                 break;
             case 'picklist':
-                // https://live.playg.app/play/picklist-in-lightning-datatable
-                // getPicklistOptions(this.objectApiName, field.fieldName).then(result => {
-                    console.log('picklistOptions==');
-                    // console.log(result);
-                    column.typeAttributes = {
-                        // options: result
-                        options: [
-                            { label: 'Hot', value: 'Hot' },
-                            { label: 'Warm', value: 'Warm' },
-                            { label: 'Cold', value: 'Cold' }
-                        ],
-                        value : { fieldName: column.fieldName },
-                        context : { fieldName: 'DeveloperName' }
-                    };
-                    console.log(column.typeAttributes);
-                    console.log(column.typeAttributes.options);
-                // });
+                column.typeAttributes = {
+                    // options: TODO - picklistOptions from Apex controller
+                    value: { fieldName: column.fieldName },
+                    context: { fieldName: 'DeveloperName' }
+                };
                 break;
             case 'string':
                 column.type = 'text';
@@ -239,6 +223,12 @@ export default class CustomMetadataTable extends LightningElement {
             console.log('deploymentStatusResponse==' + JSON.stringify(deploymentStatusResponse));
             if (deploymentStatusResponse && deploymentStatusResponse.deployResult) {
                 this.deploymentStatus = deploymentStatusResponse.deployResult.status;
+
+                if (deploymentStatusResponse.deployResult.details.componentFailures[0]) {
+                    this.deploymentMessage = 'Error: ' + deploymentStatusResponse.deployResult.details.componentFailures[0].problem;
+                } else {
+                    this.deploymentMessage = null;
+                }
             }
         }
 
@@ -247,9 +237,11 @@ export default class CustomMetadataTable extends LightningElement {
             if (this._resolvedDeploymentStatuses.includes(this.deploymentStatus) == false) {
                 timeoutId = setTimeout(() => this._getDeploymentStatus(), 2000);
             } else {
-                this.handleCancel();
-                this.records = this._draftRecords;
                 this.isDeploying = null;
+                if (this.deploymentStatus == 'Succeeded') {
+                    this.handleCancel();
+                    this.records = this._draftRecords;
+                }
 
                 this._showToastEvent('success', 'Deployment Completed', 'CMDT records were successfully deployed');
                 clearTimeout(timeoutId);
