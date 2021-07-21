@@ -8,6 +8,8 @@ public inherited sharing class CustomMetadataSaver {
     private static final Boolean DEFAULT_SEND_EMAIL_ON_SUCCESS = false;
     private static final List<String> DEPLOYMENT_JOB_IDS = new List<String>();
     private static final Set<String> IGNORED_FIELD_NAMES = getIgnoredFieldNames();
+    @testVisible
+    private static final String MOCK_DEPLOYMENT_ID = 'fakeDeploymentId';
 
     public class FlowInput {
         @InvocableVariable(required=true label='Custom Metadata Type Records to Deploy')
@@ -97,7 +99,7 @@ public inherited sharing class CustomMetadataSaver {
             deployment.addMetadata(customMetadata);
         }
 
-        String jobId = Test.isRunningTest() ? 'Fake Job ID' : Metadata.Operations.enqueueDeployment(deployment, callback);
+        String jobId = Test.isRunningTest() ? MOCK_DEPLOYMENT_ID : Metadata.Operations.enqueueDeployment(deployment, callback);
         DEPLOYMENT_JOB_IDS.add(jobId);
         System.debug(LoggingLevel.INFO, 'Deployment Job ID: ' + jobId);
 
