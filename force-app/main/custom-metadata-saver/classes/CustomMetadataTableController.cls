@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------------------------------------//
 
 public without sharing class CustomMetadataTableController {
-    private static String BASE_URL = System.Url.getOrgDomainUrl().toExternalForm() + '/services/data/v49.0';
+    private static String BASE_URL = System.Url.getOrgDomainUrl().toExternalForm() + '/services/data/v52.0';
 
     @AuraEnabled
     public static String getSObjectApiName(SObject customMetadataRecord) {
