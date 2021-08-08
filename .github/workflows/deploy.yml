@@ -65,12 +65,15 @@ jobs:
             - name: 'Deploy Metadata'
               run: sfdx force:source:push
 
+            - name: Enable improved SFDX code coverage
+              run: export SFDX_IMPROVED_CODE_COVERAGE=true
+
             - name: 'Run Apex Tests'
               run: npm run test:apex
 
               # Upload code coverage data for Apex
             - name: 'Upload code coverage for Apex to Codecov.io'
-              uses: codecov/codecov-action@v1
+              uses: codecov/codecov-action@v2.0.2
               with:
                   token: ${{ secrets.CODECOV_TOKEN }}
                   flags: Apex
