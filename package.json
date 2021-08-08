@@ -4,7 +4,8 @@
     "description": "Update & deploy changes to custom metadata types (CMDT) from Apex and Flow.",
     "main": "index.js",
     "scripts": {
-        "format": "prettier --write force-app"
+        "format": "prettier --write force-app",
+        "test:apex": "sfdx force:apex:test:run --testlevel RunLocalTests --wait 30 --resultformat human --codecoverage --outputdir ./tests/apex"
     },
     "author": "Jonathan Gillespie",
     "license": "MIT",
