@@ -60,7 +60,7 @@ jobs:
                   sfdx auth:sfdxurl:store --sfdxurlfile ./JONGPIE_DEVHUB_SFDX_URL.txt --setalias jongpie-devhub
 
             - name: 'Create Scratch Org'
-              run: sfdx force:org:create --targetdevhubusername jongpie-devhub --definitionfile ./config/enterprise-scratch-def.json --setalias CustomMetadataSaver
+              run: sfdx force:org:create --targetdevhubusername jongpie-devhub --definitionfile ./config/enterprise-scratch-def.json --setalias CustomMetadataSaver --setdefaultusername
 
             - name: 'Deploy Metadata'
               run: sfdx force:source:push
