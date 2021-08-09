@@ -72,11 +72,13 @@ jobs:
               run: npm run test:apex
 
               # Upload code coverage data for Apex
-            - name: 'Upload code coverage for Apex to Codecov.io'
-              uses: codecov/codecov-action@v2.0.2
-              with:
-                  token: ${{ secrets.CODECOV_TOKEN }}
-                  flags: Apex
+              # codecov integration is currently disabled due to
+              # issues with parsing sfdx codecoverage files
+            # - name: 'Upload code coverage for Apex to Codecov.io'
+            #   uses: codecov/codecov-action@v2.0.2
+            #   with:
+            #       token: ${{ secrets.CODECOV_TOKEN }}
+            #       flags: Apex
 
             - name: 'Delete Scratch Org'
               run: sfdx force:org:delete --json --noprompt
