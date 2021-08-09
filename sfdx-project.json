@@ -1,10 +1,27 @@
 {
     "sfdcLoginUrl": "https://login.salesforce.com",
-    "sourceApiVersion": "51.0",
+    "sourceApiVersion": "52.0",
     "packageDirectories": [
         {
-            "path": "force-app",
+            "package": "CustomMetadataSaver",
+            "path": "custom-metadata-saver/main/",
+            "default": false,
+            "definitionFile": "config/enterprise-scratch-def.json",
+            "versionName": "Unlocked Package Release",
+            "versionNumber": "1.0.0.0",
+            "versionDescription": "Initial release of the unlocked package",
+            "releaseNotesUrl": "https://github.com/jongpie/CustomMetadataSaver/releases",
+            "unpackagedMetadata": {
+                "path": "custom-metadata-saver/tests/"
+            }
+        },
+        {
+            "path": "custom-metadata-saver/tests/",
             "default": true
         }
-    ]
+    ],
+    "packageAliases": {
+        "CustomMetadataSaver": "0Ho4x00000000UOCAY",
+        "CustomMetadataSaver@1.0.0-0": "04t4x000000FDcnAAG"
+    }
 }

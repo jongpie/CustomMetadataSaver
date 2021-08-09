@@ -1,9 +1,6 @@
 # Custom Metadata Saver for Salesforce
 
-<a href="https://githubsfdeploy.herokuapp.com?owner=jongpie&repo=CustomMetadataSaver&ref=main">
-  <img alt="Deploy to Salesforce"
-       src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png">
-</a>
+[![Install Unlocked Package](./content/btn-install-unlocked-package.png)](https://login.salesforce.com/packaging/installPackage.apexp?p0=04t4x000000FDcnAAG)
 
 This is a small library that can be used in Salesforce to update & deploy changes to custom metadata types (CMDT) from Apex and Flow.
 

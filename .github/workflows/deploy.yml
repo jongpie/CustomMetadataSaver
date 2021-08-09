@@ -1,0 +1,85 @@
+# Unique name for this workflow
+name: Deployment
+
+on:
+    push:
+        paths-ignore:
+            - 'content/**'
+            - 'docs/**'
+            - 'examples/**'
+            - 'packages/**'
+            - '.forceignore'
+            - '.gitignore'
+            - '.prettierignore'
+            - '.prettierrc'
+            - 'Contributing.md'
+            - 'LICENSE'
+            - 'package.json'
+            - 'README.md'
+            - './**/README.md'
+            - 'sfdx-project.json'
+
+jobs:
+    scratch-org-tests:
+        name: 'Scratch Org Tests'
+        runs-on: ubuntu-latest
+        environment: Test
+        steps:
+            # Checkout the code
+            - name: 'Checkout source code'
+              uses: actions/checkout@v2
+
+            - name: 'Setup node'
+              uses: actions/setup-node@v2
+              with:
+                  node-version: '14'
+
+            - name: 'Install npm'
+              run: npm install
+
+            # Install Salesforce CLI
+            - name: Install Salesforce CLI
+              run: |
+                  wget https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz
+                  mkdir sfdx-cli
+                  tar xJf sfdx-linux-amd64.tar.xz -C sfdx-cli --strip-components 1
+                  ./sfdx-cli/install
+
+            # Start remote testing
+
+            # Store secrets for dev hubs
+            - name: 'Populate DevHub Auth Files'
+              shell: bash
+              run: |
+                  echo ${{ env.JONGPIE_DEVHUB_SFDX_URL }} > ./JONGPIE_DEVHUB_SFDX_URL.txt
+              env:
+                  JONGPIE_DEVHUB_SFDX_URL: ${{ secrets.JONGPIE_DEVHUB_SFDX_URL }}
+
+            - name: 'Authorize Dev Hubs'
+              run: |
+                  sfdx auth:sfdxurl:store --sfdxurlfile ./JONGPIE_DEVHUB_SFDX_URL.txt --setalias jongpie-devhub
+
+            - name: 'Create Scratch Org'
+              run: sfdx force:org:create --targetdevhubusername jongpie-devhub --definitionfile ./config/enterprise-scratch-def.json --setalias CustomMetadataSaver --setdefaultusername
+
+            - name: 'Deploy Metadata'
+              run: sfdx force:source:push
+
+            - name: Enable improved SFDX code coverage
+              run: export SFDX_IMPROVED_CODE_COVERAGE=true
+
+            - name: 'Run Apex Tests'
+              run: npm run test:apex
+
+              # Upload code coverage data for Apex
+              # codecov integration is currently disabled due to
+              # issues with parsing sfdx codecoverage files
+            # - name: 'Upload code coverage for Apex to Codecov.io'
+            #   uses: codecov/codecov-action@v2.0.2
+            #   with:
+            #       token: ${{ secrets.CODECOV_TOKEN }}
+            #       flags: Apex
+
+            - name: 'Delete Scratch Org'
+              run: sfdx force:org:delete --json --noprompt
+              if: ${{ always() }}
